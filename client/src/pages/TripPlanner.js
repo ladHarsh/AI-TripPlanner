@@ -1,486 +1,749 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
-import { useMutation } from 'react-query';
-import { FaMapMarkedAlt, FaCalendarAlt, FaDollarSign, FaUsers, FaBed, FaCar, FaLightbulb, FaSpinner } from 'react-icons/fa';
-import toast from 'react-hot-toast';
-import api from '../services/api';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
+import { useNotifications } from "../contexts/NotificationContext";
+import { useApiMutation, useApi } from "../hooks/useApi";
+import { useFormValidation } from "../hooks/useFormValidation";
+import { Button, Input, Card, LoadingSpinner } from "../components/ui";
+import { aiAPI, tripAPI } from "../services/api";
+import TripResultCard from "../components/trip/TripResultCard";
+import TripDetailView from "../components/trip/TripDetailView";
+import { useSearchParams } from "react-router-dom";
+import {
+  FaPlane,
+  FaMapMarkedAlt,
+  FaCalendarAlt,
+  FaUsers,
+  FaDollarSign,
+  FaRocket,
+  FaHeart,
+  FaMountain,
+  FaCity,
+  FaUmbrellaBeach,
+  FaTree,
+  FaUtensils,
+  FaMusic,
+  FaCamera,
+  FaMagic,
+  FaCheckCircle,
+  FaArrowRight,
+  FaArrowLeft,
+  FaSpinner,
+} from "react-icons/fa";
 
 const TripPlanner = () => {
-  const [itinerary, setItinerary] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { user, getRemainingAiRequests } = useAuth();
+  const notifications = useNotifications();
+  const [searchParams] = useSearchParams();
+  const editTripId = searchParams.get("edit");
 
-  // Generate itinerary mutation
-  const generateItineraryMutation = useMutation({
-    mutationFn: async (data) => {
-      const response = await api.post('/ai/generate-itinerary', data);
-      return response.data;
-    },
-    onSuccess: (data) => {
-      setItinerary(data.trip);
-      toast.success('Itinerary generated successfully!');
-      setIsGenerating(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [generatedItinerary, setGeneratedItinerary] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showDetailView, setShowDetailView] = useState(false);
+
+  const { values, errors, handleChange, handleBlur, isValid, setValues } =
+    useFormValidation(
+      {
+        destination: "",
+        startDate: "",
+        endDate: "",
+        travelers: 2,
+        budget: "",
+        interests: [],
+        travelStyle: "",
+        accommodationType: "",
+        transportation: "",
+        specialRequests: "",
+      },
+      {
+        destination: { required: true, minLength: 3 },
+        startDate: { required: true },
+        endDate: { required: true },
+        travelers: { required: true },
+        budget: { required: true },
+        travelStyle: { required: true },
+      }
+    );
+
+  // Load trip data for editing
+  const { data: editTrip } = useApi(
+    ["trip", editTripId],
+    () => tripAPI.getTripById(editTripId).then((res) => res.data.trip),
+    { enabled: !!editTripId }
+  );
+
+  // Autofill form when editing
+  useEffect(() => {
+    if (editTrip) {
+      const destination =
+        editTrip.destination?.city || editTrip.destination || "";
+      const startDate = editTrip.startDate
+        ? new Date(editTrip.startDate).toISOString().split("T")[0]
+        : "";
+      const endDate = editTrip.endDate
+        ? new Date(editTrip.endDate).toISOString().split("T")[0]
+        : "";
+
+      setValues({
+        destination: destination,
+        startDate: startDate,
+        endDate: endDate,
+        travelers: editTrip.preferences?.groupSize || editTrip.groupSize || 2,
+        budget:
+          editTrip.preferences?.budget?.max?.toString() ||
+          editTrip.budget?.max?.toString() ||
+          "",
+        interests: editTrip.preferences?.interests || [],
+        travelStyle: editTrip.preferences?.travelStyle || "",
+        accommodationType: editTrip.preferences?.accommodation || "",
+        transportation: Array.isArray(editTrip.preferences?.transport)
+          ? editTrip.preferences.transport[0]
+          : "",
+        specialRequests: editTrip.specialRequests || "",
+      });
+
+      toast.success("Trip loaded for editing!");
+    }
+  }, [editTrip, setValues]);
+
+  const generateItinerary = useApiMutation(aiAPI.generateItinerary, {
+    onSuccess: (response) => {
+      console.log("API Response:", response);
+      console.log("Itinerary Data:", response.data);
+      // The actual itinerary is in response.data.data
+      const itinerary = response.data.data;
+      console.log("Actual Itinerary:", itinerary);
+      setGeneratedItinerary(itinerary);
+      setCurrentStep(4);
+      toast.success("Your AI-powered itinerary is ready!");
     },
     onError: (error) => {
-      console.error('Error generating itinerary:', error);
-      toast.error(error.response?.data?.message || 'Failed to generate itinerary');
-      setIsGenerating(false);
-    }
+      console.error("Full error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to generate itinerary. Please try again."
+      );
+      console.error("Generation error:", error);
+    },
   });
 
-  const onSubmit = async (data) => {
-    setIsGenerating(true);
-    
-    // Format the data for the API
-    const tripData = {
-      destination: data.destination,
-      duration: parseInt(data.duration),
-      budget: {
-        min: parseInt(data.budgetMin),
-        max: parseInt(data.budgetMax),
-        currency: 'USD'
-      },
-      travelStyle: data.travelStyle,
-      groupSize: parseInt(data.groupSize),
-      interests: data.interests || [],
-      accommodation: data.accommodation,
-      transport: data.transport ? [data.transport] : [],
-      startDate: data.startDate,
-      endDate: data.endDate
-    };
+  const remainingRequests = getRemainingAiRequests();
 
-    generateItineraryMutation.mutate(tripData);
-  };
+  const interestOptions = [
+    { id: "culture", label: "Culture & History", icon: FaCity },
+    { id: "nature", label: "Nature & Wildlife", icon: FaTree },
+    { id: "adventure", label: "Adventure Sports", icon: FaMountain },
+    { id: "beach", label: "Beach & Relaxation", icon: FaUmbrellaBeach },
+    { id: "food", label: "Food & Cuisine", icon: FaUtensils },
+    { id: "nightlife", label: "Nightlife & Music", icon: FaMusic },
+    { id: "photography", label: "Photography", icon: FaCamera },
+    { id: "wellness", label: "Wellness & Spa", icon: FaHeart },
+  ];
 
   const travelStyles = [
-    { value: 'budget', label: 'Budget', icon: '💰' },
-    { value: 'luxury', label: 'Luxury', icon: '✨' },
-    { value: 'adventure', label: 'Adventure', icon: '🏔️' },
-    { value: 'cultural', label: 'Cultural', icon: '🏛️' },
-    { value: 'relaxation', label: 'Relaxation', icon: '🌴' },
-    { value: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦' }
+    { id: "luxury", label: "Luxury", description: "High-end experiences" },
+    { id: "mid-range", label: "Mid-Range", description: "Comfortable travel" },
+    { id: "budget", label: "Budget", description: "Cost-effective options" },
+    { id: "adventure", label: "Adventure", description: "Off-the-beaten-path" },
   ];
 
   const accommodationTypes = [
-    { value: 'hotel', label: 'Hotel' },
-    { value: 'hostel', label: 'Hostel' },
-    { value: 'apartment', label: 'Apartment' },
-    { value: 'resort', label: 'Resort' },
-    { value: 'camping', label: 'Camping' }
+    { id: "hotel", label: "Hotels" },
+    { id: "resort", label: "Resorts" },
+    { id: "airbnb", label: "Vacation Rentals" },
+    { id: "hostel", label: "Hostels" },
+    { id: "boutique", label: "Boutique Hotels" },
   ];
 
-  const transportOptions = [
-    { value: 'public', label: 'Public Transport' },
-    { value: 'rental', label: 'Car Rental' },
-    { value: 'walking', label: 'Walking' },
-    { value: 'biking', label: 'Biking' },
-    { value: 'taxi', label: 'Taxi/Rideshare' }
+  const transportationOptions = [
+    { id: "flight", label: "Flight" },
+    { id: "train", label: "Train" },
+    { id: "car", label: "Car Rental" },
+    { id: "bus", label: "Bus" },
+    { id: "mixed", label: "Mixed Options" },
   ];
 
-  const interests = [
-    'Museums', 'Nature', 'Food', 'Shopping', 'Sports', 'History', 
-    'Art', 'Music', 'Photography', 'Architecture', 'Local Culture', 'Nightlife'
+  const handleInterestChange = (interestId) => {
+    const currentInterests = values.interests || [];
+    const newInterests = currentInterests.includes(interestId)
+      ? currentInterests.filter((id) => id !== interestId)
+      : [...currentInterests, interestId];
+
+    setValues((prev) => ({ ...prev, interests: newInterests }));
+  };
+
+  const handleGenerateItinerary = async () => {
+    if (remainingRequests <= 0) {
+      toast.error(
+        "You've reached your AI request limit. Please upgrade your plan."
+      );
+      return;
+    }
+
+    if (!isValid) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Calculate duration in days
+      const start = new Date(values.startDate);
+      const end = new Date(values.endDate);
+      const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+      // Map budget to numeric range
+      const budgetRanges = {
+        budget: { min: 8000, max: 80000 },
+        "mid-range": { min: 80000, max: 240000 },
+        luxury: { min: 240000, max: 800000 },
+      };
+
+      const budgetRange = budgetRanges[values.budget] || {
+        min: 40000,
+        max: 160000,
+      };
+
+      // Prepare data for backend
+      const itineraryData = {
+        destination: values.destination,
+        duration,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        budget: {
+          min: budgetRange.min,
+          max: budgetRange.max,
+          currency: "INR",
+        },
+        travelStyle: values.travelStyle || "mid-range",
+        interests: values.interests || [],
+        groupSize: parseInt(values.travelers) || 1,
+        accommodation: values.accommodationType || "hotel",
+        transport: values.transportation
+          ? [values.transportation]
+          : ["flexible"],
+        specialRequests: values.specialRequests || "",
+      };
+
+      await generateItinerary.mutateAsync(itineraryData);
+    } catch (error) {
+      console.error("Error generating itinerary:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const nextStep = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const stepTitles = [
+    "Destination & Dates",
+    "Travel Preferences",
+    "Generate Itinerary",
+    "Your Itinerary",
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8"
+          className="text-center mb-6"
         >
-          <div className="flex items-center justify-center mb-4">
-            <FaLightbulb className="h-8 w-8 text-primary-600 mr-3" />
-            <h1 className="text-3xl font-bold text-gray-900">AI Trip Planner</h1>
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 shadow-xl text-white mb-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="flex justify-center mb-3"
+            >
+              <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl">
+                <FaMagic className="h-10 w-10" />
+              </div>
+            </motion.div>
+            <h1 className="text-3xl font-bold mb-2">AI Trip Planner</h1>
+            <p className="text-blue-100 text-lg">
+              Let our AI create the perfect itinerary for your next adventure
+            </p>
+            {remainingRequests !== -1 && (
+              <div className="mt-3 inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl text-sm font-semibold">
+                <FaRocket className="mr-2" />
+                {remainingRequests} AI requests remaining
+              </div>
+            )}
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Let our AI create a personalized travel itinerary just for you. 
-            Tell us your preferences and we'll plan the perfect trip!
-          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Trip Planning Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <div className="card">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Plan Your Trip
+        {/* Progress Steps */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6"
+        >
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              {stepTitles.map((title, index) => {
+                const stepNumber = index + 1;
+                const isActive = currentStep === stepNumber;
+                const isCompleted = currentStep > stepNumber;
+
+                return (
+                  <div key={stepNumber} className="flex items-center">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-all duration-300 ${
+                        isActive || isCompleted
+                          ? "border-transparent bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-400"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <FaCheckCircle className="h-6 w-6" />
+                      ) : (
+                        <span className="text-base font-bold">
+                          {stepNumber}
+                        </span>
+                      )}
+                    </motion.div>
+                    {index < stepTitles.length - 1 && (
+                      <div
+                        className={`w-12 h-1 ml-3 rounded-full transition-all duration-300 ${
+                          isCompleted
+                            ? "bg-gradient-to-r from-blue-600 to-purple-600"
+                            : "bg-gray-300 dark:bg-gray-600"
+                        }`}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                {stepTitles[currentStep - 1]}
               </h2>
+            </div>
+          </div>
+        </motion.div>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                {/* Destination */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <FaMapMarkedAlt className="inline mr-2" />
-                    Destination *
-                  </label>
-                  <input
-                    type="text"
-                    {...register('destination', { required: 'Destination is required' })}
-                    className={`input ${errors.destination ? 'input-error' : ''}`}
-                    placeholder="e.g., Paris, France"
-                  />
-                  {errors.destination && (
-                    <p className="text-red-500 text-sm mt-1">{errors.destination.message}</p>
-                  )}
+        {/* Step Content */}
+        <Card className="p-6 md:p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl rounded-2xl">
+          {/* Step 1: Destination & Dates */}
+          {currentStep === 1 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input
+                  name="destination"
+                  label="Where do you want to go?"
+                  placeholder="e.g., Tokyo, Japan"
+                  icon={FaMapMarkedAlt}
+                  value={values.destination}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={errors.destination}
+                  required
+                />
+
+                <Input
+                  name="travelers"
+                  type="number"
+                  min="1"
+                  max="20"
+                  label="Number of travelers"
+                  icon={FaUsers}
+                  value={values.travelers}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={errors.travelers}
+                  required
+                />
+
+                <Input
+                  name="startDate"
+                  type="date"
+                  label="Start date"
+                  icon={FaCalendarAlt}
+                  value={values.startDate}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={errors.startDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  required
+                />
+
+                <Input
+                  name="endDate"
+                  type="date"
+                  label="End date"
+                  icon={FaCalendarAlt}
+                  value={values.endDate}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={errors.endDate}
+                  min={values.startDate}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Budget per person (INR)
+                </label>
+                <select
+                  name="budget"
+                  value={values.budget}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  required
+                >
+                  <option value="">Select your budget</option>
+                  <option value="budget">Under ₹80,000 (Budget)</option>
+                  <option value="mid-range">
+                    ₹80,000 - ₹240,000 (Mid-range)
+                  </option>
+                  <option value="luxury">₹240,000+ (Luxury)</option>
+                </select>
+                {errors.budget && (
+                  <p className="mt-1 text-sm text-red-600">{errors.budget}</p>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 2: Travel Preferences */}
+          {currentStep === 2 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="space-y-8"
+            >
+              {/* Interests */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-5">
+                  What are your interests?
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {interestOptions.map((interest) => (
+                    <motion.button
+                      key={interest.id}
+                      type="button"
+                      onClick={() => handleInterestChange(interest.id)}
+                      whileHover={{ scale: 1.05, y: -3 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`p-4 rounded-xl border-2 transition-all duration-300 text-center ${
+                        values.interests?.includes(interest.id)
+                          ? "border-transparent bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-lg"
+                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md"
+                      }`}
+                    >
+                      <interest.icon
+                        className={`h-7 w-7 mx-auto mb-2 ${
+                          values.interests?.includes(interest.id)
+                            ? "text-white"
+                            : "text-gray-400"
+                        }`}
+                      />
+                      <span className="text-xs font-semibold">
+                        {interest.label}
+                      </span>
+                    </motion.button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Duration */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <FaCalendarAlt className="inline mr-2" />
-                    Trip Duration (days) *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="30"
-                    {...register('duration', { 
-                      required: 'Duration is required',
-                      min: { value: 1, message: 'Minimum 1 day' },
-                      max: { value: 30, message: 'Maximum 30 days' }
-                    })}
-                    className={`input ${errors.duration ? 'input-error' : ''}`}
-                    placeholder="7"
-                  />
-                  {errors.duration && (
-                    <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
-                  )}
+              {/* Travel Style */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-5">
+                  Travel Style
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {travelStyles.map((style) => (
+                    <motion.button
+                      key={style.id}
+                      type="button"
+                      onClick={() =>
+                        setValues((prev) => ({
+                          ...prev,
+                          travelStyle: style.id,
+                        }))
+                      }
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`p-5 rounded-xl border-2 transition-all duration-300 text-left ${
+                        values.travelStyle === style.id
+                          ? "border-transparent bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-lg"
+                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md"
+                      }`}
+                    >
+                      <h4
+                        className={`font-bold text-lg mb-1 ${
+                          values.travelStyle === style.id
+                            ? "text-white"
+                            : "text-gray-900 dark:text-white"
+                        }`}
+                      >
+                        {style.label}
+                      </h4>
+                      <p
+                        className={`text-sm ${
+                          values.travelStyle === style.id
+                            ? "text-blue-100"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}
+                      >
+                        {style.description}
+                      </p>
+                    </motion.button>
+                  ))}
                 </div>
+              </div>
 
-                {/* Budget Range */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <FaDollarSign className="inline mr-2" />
-                      Min Budget ($)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      {...register('budgetMin', { 
-                        required: 'Minimum budget is required',
-                        min: { value: 0, message: 'Budget must be positive' }
-                      })}
-                      className={`input ${errors.budgetMin ? 'input-error' : ''}`}
-                      placeholder="500"
-                    />
-                    {errors.budgetMin && (
-                      <p className="text-red-500 text-sm mt-1">{errors.budgetMin.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <FaDollarSign className="inline mr-2" />
-                      Max Budget ($)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      {...register('budgetMax', { 
-                        required: 'Maximum budget is required',
-                        min: { value: 0, message: 'Budget must be positive' }
-                      })}
-                      className={`input ${errors.budgetMax ? 'input-error' : ''}`}
-                      placeholder="2000"
-                    />
-                    {errors.budgetMax && (
-                      <p className="text-red-500 text-sm mt-1">{errors.budgetMax.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Travel Style */}
+              {/* Accommodation & Transportation */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Travel Style *
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {travelStyles.map((style) => (
-                      <label key={style.value} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                        <input
-                          type="radio"
-                          value={style.value}
-                          {...register('travelStyle', { required: 'Travel style is required' })}
-                          className="mr-3"
-                        />
-                        <span className="text-lg mr-2">{style.icon}</span>
-                        <span className="text-sm font-medium">{style.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                  {errors.travelStyle && (
-                    <p className="text-red-500 text-sm mt-1">{errors.travelStyle.message}</p>
-                  )}
-                </div>
-
-                {/* Group Size */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <FaUsers className="inline mr-2" />
-                    Group Size *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    {...register('groupSize', { 
-                      required: 'Group size is required',
-                      min: { value: 1, message: 'Minimum 1 person' },
-                      max: { value: 10, message: 'Maximum 10 people' }
-                    })}
-                    className={`input ${errors.groupSize ? 'input-error' : ''}`}
-                    placeholder="2"
-                  />
-                  {errors.groupSize && (
-                    <p className="text-red-500 text-sm mt-1">{errors.groupSize.message}</p>
-                  )}
-                </div>
-
-                {/* Accommodation Preference */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <FaBed className="inline mr-2" />
-                    Accommodation Preference
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Accommodation Type
                   </label>
                   <select
-                    {...register('accommodation')}
-                    className="input"
+                    name="accommodationType"
+                    value={values.accommodationType}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="">Any accommodation</option>
+                    <option value="">Any preference</option>
                     {accommodationTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
+                      <option key={type.id} value={type.id}>
                         {type.label}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Transport Preference */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <FaCar className="inline mr-2" />
-                    Transport Preference
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Transportation
                   </label>
                   <select
-                    {...register('transport')}
-                    className="input"
+                    name="transportation"
+                    value={values.transportation}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   >
-                    <option value="">Any transport</option>
-                    {transportOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
+                    <option value="">Any preference</option>
+                    {transportationOptions.map((transport) => (
+                      <option key={transport.id} value={transport.id}>
+                        {transport.label}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
 
-                {/* Interests */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Interests (Select multiple)
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {interests.map((interest) => (
-                      <label key={interest} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          value={interest.toLowerCase()}
-                          {...register('interests')}
-                          className="mr-2"
-                        />
-                        <span className="text-sm">{interest}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+              {/* Special Requests */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Special Requests (Optional)
+                </label>
+                <textarea
+                  name="specialRequests"
+                  value={values.specialRequests}
+                  onChange={handleChange}
+                  placeholder="Any special requirements, accessibility needs, or specific preferences..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+            </motion.div>
+          )}
 
-                {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      {...register('startDate')}
-                      className="input"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      {...register('endDate')}
-                      className="input"
-                    />
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isGenerating}
-                  className="btn-lg bg-primary-600 text-white hover:bg-primary-700 font-semibold w-full flex items-center justify-center"
+          {/* Step 3: Generate Itinerary */}
+          {currentStep === 3 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-center space-y-8"
+            >
+              <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20 p-8 rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  className="inline-block"
                 >
-                  {isGenerating ? (
-                    <>
-                      <FaSpinner className="animate-spin mr-2" />
-                      Generating Itinerary...
-                    </>
+                  <div className="p-5 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl shadow-xl">
+                    <FaRocket className="h-12 w-12 text-white" />
+                  </div>
+                </motion.div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                  Ready to Create Your Perfect Itinerary?
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
+                  Our AI will analyze your preferences and create a personalized
+                  itinerary with activities, restaurants, and accommodations
+                  tailored just for you.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  <div className="text-center">
+                    <FaMapMarkedAlt className="h-6 w-6 mx-auto text-blue-600 mb-2" />
+                    <p className="text-sm font-medium">{values.destination}</p>
+                  </div>
+                  <div className="text-center">
+                    <FaCalendarAlt className="h-6 w-6 mx-auto text-blue-600 mb-2" />
+                    <p className="text-sm font-medium">
+                      {values.startDate && values.endDate
+                        ? `${Math.ceil(
+                            (new Date(values.endDate) -
+                              new Date(values.startDate)) /
+                              (1000 * 60 * 60 * 24)
+                          )} days`
+                        : "Duration"}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <FaUsers className="h-6 w-6 mx-auto text-blue-600 mb-2" />
+                    <p className="text-sm font-medium">
+                      {values.travelers} travelers
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <FaDollarSign className="h-6 w-6 mx-auto text-blue-600 mb-2" />
+                    <p className="text-sm font-medium capitalize">
+                      {values.budget}
+                    </p>
+                  </div>
+                </div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-block"
+                >
+                  <Button
+                    onClick={handleGenerateItinerary}
+                    disabled={isGenerating || !isValid}
+                    loading={isGenerating}
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all"
+                    icon={isGenerating ? FaSpinner : FaMagic}
+                  >
+                    {isGenerating
+                      ? "AI is crafting your perfect trip... (this may take 1-2 minutes)"
+                      : "Generate AI Itinerary"}
+                  </Button>
+                </motion.div>
+
+                {isGenerating && (
+                  <div className="mt-4 text-center">
+                    <div className="flex items-center justify-center space-x-2 text-blue-600">
+                      <FaSpinner className="animate-spin" />
+                      <p className="text-sm">
+                        Please wait... AI is analyzing destinations, planning
+                        activities, and optimizing your itinerary
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {remainingRequests > 0 &&
+                  remainingRequests !== -1 &&
+                  !isGenerating && (
+                    <p className="mt-4 text-sm text-gray-500">
+                      This will use 1 of your {remainingRequests} remaining AI
+                      requests
+                    </p>
+                  )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 4: Generated Itinerary */}
+          {currentStep === 4 && generatedItinerary && (
+            <TripResultCard
+              itinerary={generatedItinerary}
+              formValues={values}
+              onViewDetails={() => setShowDetailView(true)}
+            />
+          )}
+
+          {/* Navigation Buttons */}
+          {currentStep < 4 && (
+            <div className="flex justify-between mt-8 gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  variant="outline"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                  className="px-6 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 font-semibold"
+                >
+                  <FaArrowLeft className="mr-2" />
+                  Previous
+                </Button>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  onClick={
+                    currentStep === 3 ? handleGenerateItinerary : nextStep
+                  }
+                  disabled={
+                    (currentStep === 1 && !values.destination) ||
+                    (currentStep === 3 && isGenerating)
+                  }
+                  loading={currentStep === 3 && isGenerating}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold shadow-lg"
+                >
+                  {currentStep === 3 ? "Generate Itinerary" : "Next"}
+                  {currentStep === 3 ? (
+                    <FaMagic className="ml-2" />
                   ) : (
-                    <>
-                      <FaLightbulb className="mr-2" />
-                      Generate AI Itinerary
-                    </>
+                    <FaArrowRight className="ml-2" />
                   )}
-                </button>
-              </form>
+                </Button>
+              </motion.div>
             </div>
-          </motion.div>
-
-          {/* Generated Itinerary */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {itinerary ? (
-              <div className="card">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                  Your AI-Generated Itinerary
-                </h2>
-                
-                <div className="space-y-6">
-                  {/* Trip Summary */}
-                  <div className="bg-primary-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-semibold text-primary-900 mb-2">
-                      {itinerary.title}
-                    </h3>
-                    <p className="text-primary-700">{itinerary.description}</p>
-                    <div className="mt-3 flex items-center justify-between text-sm">
-                      <span className="text-primary-600">
-                        Total Cost: ${itinerary.itinerary?.totalCost?.amount || 'TBD'}
-                      </span>
-                      <span className="text-primary-600">
-                        {itinerary.preferences?.duration} days
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Daily Itinerary */}
-                  {itinerary.itinerary?.days?.map((day, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-900 mb-3">
-                        Day {day.day} - {day.date}
-                      </h4>
-                      
-                      <div className="space-y-3">
-                        {day.activities?.map((activity, actIndex) => (
-                          <div key={actIndex} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="text-sm font-medium text-gray-500 min-w-[60px]">
-                              {activity.time}
-                            </div>
-                            <div className="flex-1">
-                              <h5 className="font-medium text-gray-900">
-                                {activity.activity}
-                              </h5>
-                              <p className="text-sm text-gray-600">
-                                {activity.location?.name || activity.location}
-                              </p>
-                              <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
-                                <span>${activity.cost?.amount || activity.cost}</span>
-                                <span>{activity.duration}h</span>
-                                <span className="capitalize">{activity.type}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <div className="mt-3 pt-3 border-t">
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600">Day Total:</span>
-                          <span className="font-medium">
-                            ${day.totalCost?.amount || day.totalCost}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Recommendations */}
-                  {itinerary.recommendations && (
-                    <div className="border rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-900 mb-3">Recommendations</h4>
-                      
-                      {itinerary.recommendations.localTips && (
-                        <div className="mb-4">
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">Local Tips</h5>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {itinerary.recommendations.localTips.map((tip, index) => (
-                              <li key={index} className="flex items-start">
-                                <span className="text-primary-600 mr-2">•</span>
-                                {tip}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {itinerary.recommendations.safetyTips && (
-                        <div>
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">Safety Tips</h5>
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            {itinerary.recommendations.safetyTips.map((tip, index) => (
-                              <li key={index} className="flex items-start">
-                                <span className="text-warning-600 mr-2">•</span>
-                                {tip}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-3">
-                    <button className="btn bg-primary-600 text-white hover:bg-primary-700 flex-1">
-                      Save Trip
-                    </button>
-                    <button className="btn border border-gray-300 text-gray-700 hover:bg-gray-50 flex-1">
-                      Export PDF
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="card h-full flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <FaLightbulb className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                  <h3 className="text-lg font-medium mb-2">No Itinerary Yet</h3>
-                  <p className="text-sm">
-                    Fill out the form on the left and click "Generate AI Itinerary" 
-                    to create your personalized travel plan.
-                  </p>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </div>
+          )}
+        </Card>
       </div>
+
+      {/* Full Trip Detail Modal */}
+      <AnimatePresence>
+        {showDetailView && generatedItinerary && (
+          <TripDetailView
+            itinerary={generatedItinerary}
+            formValues={values}
+            onClose={() => setShowDetailView(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

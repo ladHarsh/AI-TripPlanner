@@ -1,33 +1,56 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaRoute, FaTwitter, FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import React from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  FaTwitter,
+  FaInstagram,
+  FaLinkedin,
+  FaShieldAlt,
+  FaRocket,
+} from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center mb-4">
-              <FaRoute className="h-8 w-8 text-primary-400" />
-              <span className="ml-2 text-xl font-bold">AI Trip Planner</span>
-            </div>
-            <p className="text-gray-400 mb-4 max-w-md">
-              Your intelligent travel companion. Plan, book, and explore the world with AI-powered itineraries, 
-              real-time location tracking, and seamless booking experiences.
+    <footer className="relative bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 dark:from-black dark:via-blue-950/50 dark:to-black text-white py-16 overflow-hidden">
+      {/* Background Animation */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12"
+        >
+          {/* Brand Section */}
+          <div>
+            <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              AI Trip Planner
+            </h3>
+            <p className="text-gray-400 mb-4 leading-relaxed">
+              Your intelligent travel companion powered by cutting-edge AI. Plan
+              smarter, explore better.
             </p>
-            <div className="flex space-x-4">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-400 transition-colors">
+            <div className="flex space-x-4 mt-6">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/50"
+              >
                 <FaTwitter className="h-5 w-5" />
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-400 transition-colors">
-                <FaFacebook className="h-5 w-5" />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-400 transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-pink-500/50"
+              >
                 <FaInstagram className="h-5 w-5" />
               </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-primary-400 transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-600/50"
+              >
                 <FaLinkedin className="h-5 w-5" />
               </a>
             </div>
@@ -35,74 +58,90 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/planner" className="text-gray-400 hover:text-white transition-colors">
-                  Trip Planner
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Services</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/hotels" className="text-gray-400 hover:text-white transition-colors">
-                  Hotel Booking
-                </Link>
-              </li>
-              <li>
-                <Link to="/transport" className="text-gray-400 hover:text-white transition-colors">
-                  Transport
-                </Link>
-              </li>
-              <li>
-                <Link to="/maps" className="text-gray-400 hover:text-white transition-colors">
-                  Live Maps
-                </Link>
-              </li>
-              <li>
-                <Link to="/trips" className="text-gray-400 hover:text-white transition-colors">
-                  My Trips
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-800 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © 2024 AI Trip Planner. All rights reserved.
-            </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link to="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-                Terms of Service
-              </Link>
+            <h4 className="text-lg font-semibold mb-6 text-white">
+              Quick Links
+            </h4>
+            <div className="space-y-3">
+              {[
+                { name: "Dashboard", to: "/dashboard" },
+                { name: "Trip Planner", to: "/trip-planner" },
+                { name: "Maps", to: "/maps" },
+                { name: "My Trips", to: "/trips" },
+              ].map((link, index) => (
+                <motion.div
+                  key={link.name}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Link
+                    to={link.to}
+                    className="text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-3 group-hover:bg-purple-500"></span>
+                    {link.name}
+                  </Link>
+                </motion.div>
+              ))}
             </div>
           </div>
-        </div>
+
+          {/* Resources */}
+          <div>
+            <h4 className="text-lg font-semibold mb-6 text-white">Resources</h4>
+            <div className="space-y-3">
+              {[
+                "Documentation",
+                "Help Center",
+                "Privacy Policy",
+                "Terms of Service",
+              ].map((item, index) => (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 mr-3 group-hover:bg-pink-500"></span>
+                    {item}
+                  </a>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Bottom Bar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="border-t border-gray-800/50 pt-8"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p className="text-gray-400 text-sm">
+              &copy; {new Date().getFullYear()} AI Trip Planner. All rights
+              reserved.
+            </p>
+            <div className="flex items-center space-x-6 text-sm text-gray-400">
+              <span className="flex items-center">
+                <FaShieldAlt className="h-4 w-4 mr-2 text-green-400" />
+                Secure & Private
+              </span>
+              <span className="flex items-center">
+                <FaRocket className="h-4 w-4 mr-2 text-purple-400" />
+                AI Powered
+              </span>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </footer>
   );

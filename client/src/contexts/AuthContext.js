@@ -1,25 +1,25 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import api from '../services/api';
+import React, { createContext, useContext, useReducer, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import api from "../services/api";
 
 const AuthContext = createContext();
 
 const initialState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem("token"),
   isAuthenticated: false,
-  loading: true,
+  loading: !!localStorage.getItem("token"), // Only show loading if there's a token to verify
 };
 
 const authReducer = (state, action) => {
   switch (action.type) {
-    case 'AUTH_START':
+    case "AUTH_START":
       return {
         ...state,
         loading: true,
       };
-    case 'AUTH_SUCCESS':
+    case "AUTH_SUCCESS":
       return {
         ...state,
         user: action.payload.user,
@@ -27,7 +27,7 @@ const authReducer = (state, action) => {
         isAuthenticated: true,
         loading: false,
       };
-    case 'AUTH_FAIL':
+    case "AUTH_FAIL":
       return {
         ...state,
         user: null,
@@ -35,7 +35,7 @@ const authReducer = (state, action) => {
         isAuthenticated: false,
         loading: false,
       };
-    case 'LOGOUT':
+    case "LOGOUT":
       return {
         ...state,
         user: null,
@@ -43,7 +43,7 @@ const authReducer = (state, action) => {
         isAuthenticated: false,
         loading: false,
       };
-    case 'UPDATE_USER':
+    case "UPDATE_USER":
       return {
         ...state,
         user: action.payload,
@@ -60,33 +60,47 @@ export const AuthProvider = ({ children }) => {
   // Set auth token in axios headers
   useEffect(() => {
     if (state.token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${state.token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${state.token}`;
     } else {
-      delete api.defaults.headers.common['Authorization'];
+      delete api.defaults.headers.common["Authorization"];
     }
   }, [state.token]);
 
   // Check if user is authenticated on app load
   useEffect(() => {
     const checkAuth = async () => {
-      if (state.token) {
+      const storedToken = localStorage.getItem("token");
+      if (storedToken) {
         try {
-          dispatch({ type: 'AUTH_START' });
-          const response = await api.get('/api/auth/me');
+          // Add timeout to prevent hanging
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => {
+            controller.abort();
+            console.error("Auth check timeout - clearing token");
+            localStorage.removeItem("token");
+            dispatch({ type: "AUTH_FAIL" });
+          }, 5000); // 5 second timeout
+
+          const response = await api.get("/auth/me", {
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+
           dispatch({
-            type: 'AUTH_SUCCESS',
+            type: "AUTH_SUCCESS",
             payload: {
               user: response.data.user,
-              token: state.token,
+              token: storedToken,
             },
           });
         } catch (error) {
-          console.error('Auth check failed:', error);
-          localStorage.removeItem('token');
-          dispatch({ type: 'AUTH_FAIL' });
+          console.error("Auth check failed:", error);
+          localStorage.removeItem("token");
+          dispatch({ type: "AUTH_FAIL" });
         }
       } else {
-        dispatch({ type: 'AUTH_FAIL' });
+        // No token, immediately set loading to false
+        dispatch({ type: "AUTH_FAIL" });
       }
     };
 
@@ -95,24 +109,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      dispatch({ type: 'AUTH_START' });
-      const response = await api.post('/api/auth/login', { email, password });
-      
+      dispatch({ type: "AUTH_START" });
+      const response = await api.post("/auth/login", { email, password });
+
       const { user, token } = response.data;
-      localStorage.setItem('token', token);
-      
+      localStorage.setItem("token", token);
+
       dispatch({
-        type: 'AUTH_SUCCESS',
+        type: "AUTH_SUCCESS",
         payload: { user, token },
       });
-      
-      toast.success('Login successful!');
-      navigate('/dashboard');
-      
+
+      toast.success("Login successful!");
+      navigate("/dashboard");
+
       return { success: true };
     } catch (error) {
-      dispatch({ type: 'AUTH_FAIL' });
-      const message = error.response?.data?.message || 'Login failed';
+      dispatch({ type: "AUTH_FAIL" });
+      const message = error.response?.data?.message || "Login failed";
       toast.error(message);
       return { success: false, message };
     }
@@ -120,24 +134,24 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      dispatch({ type: 'AUTH_START' });
-      const response = await api.post('/api/auth/register', userData);
-      
+      dispatch({ type: "AUTH_START" });
+      const response = await api.post("/auth/register", userData);
+
       const { user, token } = response.data;
-      localStorage.setItem('token', token);
-      
+      localStorage.setItem("token", token);
+
       dispatch({
-        type: 'AUTH_SUCCESS',
+        type: "AUTH_SUCCESS",
         payload: { user, token },
       });
-      
-      toast.success('Registration successful!');
-      navigate('/dashboard');
-      
+
+      toast.success("Registration successful!");
+      navigate("/dashboard");
+
       return { success: true };
     } catch (error) {
-      dispatch({ type: 'AUTH_FAIL' });
-      const message = error.response?.data?.message || 'Registration failed';
+      dispatch({ type: "AUTH_FAIL" });
+      const message = error.response?.data?.message || "Registration failed";
       toast.error(message);
       return { success: false, message };
     }
@@ -146,29 +160,29 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (state.token) {
-        await api.post('/api/auth/logout');
+        await api.post("/auth/logout");
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
-      localStorage.removeItem('token');
-      dispatch({ type: 'LOGOUT' });
-      toast.success('Logged out successfully');
-      navigate('/');
+      localStorage.removeItem("token");
+      dispatch({ type: "LOGOUT" });
+      toast.success("Logged out successfully");
+      navigate("/");
     }
   };
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await api.put('/api/auth/profile', profileData);
+      const response = await api.put("/auth/profile", profileData);
       dispatch({
-        type: 'UPDATE_USER',
+        type: "UPDATE_USER",
         payload: response.data.user,
       });
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Profile update failed';
+      const message = error.response?.data?.message || "Profile update failed";
       toast.error(message);
       return { success: false, message };
     }
@@ -176,13 +190,62 @@ export const AuthProvider = ({ children }) => {
 
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      await api.put('/api/auth/password', { currentPassword, newPassword });
-      toast.success('Password changed successfully');
+      await api.put("/auth/password", { currentPassword, newPassword });
+      toast.success("Password changed successfully");
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Password change failed';
+      const message = error.response?.data?.message || "Password change failed";
       toast.error(message);
       return { success: false, message };
+    }
+  };
+
+  const hasPermission = (permission) => {
+    if (!state.user) return false;
+
+    // Admin has all permissions
+    if (state.user.role === "admin") return true;
+
+    // Check specific permissions
+    switch (permission) {
+      case "admin":
+        return state.user.role === "admin";
+      case "premium":
+        return ["premium", "pro", "admin"].includes(state.user.planType);
+      case "pro":
+        return ["pro", "admin"].includes(state.user.planType);
+      default:
+        return true; // Basic user permissions
+    }
+  };
+
+  const getRemainingAiRequests = () => {
+    if (!state.user) return 0;
+
+    // Return remaining AI requests based on plan
+    switch (state.user.planType) {
+      case "free":
+        return state.user.aiRequestsRemaining || 0;
+      case "premium":
+        return state.user.aiRequestsRemaining || 50;
+      case "enterprise":
+        return -1; // Unlimited
+      default:
+        return 0;
+    }
+  };
+
+  const refreshUserData = async () => {
+    try {
+      const response = await api.get("/auth/me");
+      dispatch({
+        type: "UPDATE_USER",
+        payload: response.data.user,
+      });
+      return response.data.user;
+    } catch (error) {
+      console.error("Failed to refresh user data:", error);
+      return null;
     }
   };
 
@@ -196,6 +259,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     changePassword,
+    hasPermission,
+    getRemainingAiRequests,
+    refreshUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -204,7 +270,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

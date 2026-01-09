@@ -1,297 +1,486 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useQuery } from 'react-query';
-import { motion } from 'framer-motion';
-import { 
-  FaPlane, 
-  FaHotel, 
-  FaMapMarkedAlt, 
-  FaRoute, 
+import React from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { useApi } from "../hooks/useApi";
+import { userAPI, tripAPI, aiAPI } from "../services/api";
+import { Card, Button, LoadingSpinner, Badge } from "../components/ui";
+import {
+  FaPlane,
+  FaMapMarkedAlt,
+  FaRoute,
   FaCalendarAlt,
-  FaClock,
-  FaPlus
-} from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+  FaRocket,
+  FaGlobe,
+  FaArrowRight,
+  FaPlus,
+  FaStar,
+} from "react-icons/fa";
 
 const Dashboard = () => {
-  const { user } = useAuth();
-
-  // Fetch user data
-  const { data: tripsData, isLoading: tripsLoading } = useQuery(
-    'upcomingTrips',
-    () => api.get('/api/trips/upcoming?limit=3').then(res => res.data),
-    { staleTime: 5 * 60 * 1000 }
+  const { user, hasPermission, getRemainingAiRequests } = useAuth();
+  const { data: stats, isLoading: statsLoading } = useApi(["userStats"], () =>
+    userAPI.getUserStats().then((res) => res.data)
+  );
+  const { data: recentTrips, isLoading: tripsLoading } = useApi(
+    ["userTrips"],
+    () => tripAPI.getTrips().then((res) => res.data.trips || res.data)
+  );
+  const { data: recommendations } = useApi(["aiRecommendations"], () =>
+    aiAPI.getRecommendations().then((res) => res.data)
   );
 
-  const { data: bookingsData, isLoading: bookingsLoading } = useQuery(
-    'recentBookings',
-    () => api.get('/api/bookings?limit=5').then(res => res.data),
-    { staleTime: 5 * 60 * 1000 }
-  );
-
-  const stats = [
-    {
-      title: 'Upcoming Trips',
-      value: tripsData?.count || 0,
-      icon: FaPlane,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-      link: '/trips'
-    },
-    {
-      title: 'Active Bookings',
-      value: bookingsData?.count || 0,
-      icon: FaHotel,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-      link: '/bookings'
-    },
-    {
-      title: 'Saved Locations',
-      value: user?.savedDestinations?.length || 0,
-      icon: FaMapMarkedAlt,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-      link: '/maps'
-    },
-    {
-      title: 'Total Trips',
-      value: '12', // This would come from API
-      icon: FaRoute,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
-      link: '/trips'
-    }
-  ];
+  const remainingAiRequests = getRemainingAiRequests();
 
   const quickActions = [
     {
-      title: 'Plan New Trip',
-      description: 'Create a new AI-powered itinerary',
-      icon: FaPlus,
-      link: '/planner',
-      color: 'bg-gradient-to-r from-primary-600 to-primary-700'
-    },
-    {
-      title: 'Book Hotel',
-      description: 'Find and book accommodation',
-      icon: FaHotel,
-      link: '/hotels',
-      color: 'bg-gradient-to-r from-green-600 to-green-700'
-    },
-    {
-      title: 'Book Transport',
-      description: 'Book flights, trains, or buses',
+      title: "Plan New Trip",
+      description: "Create AI-powered itinerary",
       icon: FaPlane,
-      link: '/transport',
-      color: 'bg-gradient-to-r from-blue-600 to-blue-700'
+      href: "/trip-planner",
+      color: "bg-gradient-to-br from-blue-500 to-blue-600",
+      hoverColor: "hover:from-blue-600 hover:to-blue-700",
     },
     {
-      title: 'Live Maps',
-      description: 'Explore destinations and save locations',
+      title: "Explore Maps",
+      description: "Discover destinations",
       icon: FaMapMarkedAlt,
-      link: '/maps',
-      color: 'bg-gradient-to-r from-purple-600 to-purple-700'
-    }
+      href: "/maps",
+      color: "bg-gradient-to-br from-green-500 to-green-600",
+      hoverColor: "hover:from-green-600 hover:to-green-700",
+    },
   ];
 
-  if (tripsLoading || bookingsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  // Calculate upcoming and completed trips
+  const upcomingTrips =
+    recentTrips?.filter((trip) => {
+      const startDate = new Date(trip.startDate);
+      const now = new Date();
+      return startDate > now;
+    }).length || 0;
+
+  const completedTrips =
+    recentTrips?.filter((trip) => {
+      const endDate = new Date(trip.endDate);
+      const now = new Date();
+      return endDate < now;
+    }).length || 0;
+
+  const statsCards = [
+    {
+      title: "Total Trips Generated",
+      value: recentTrips?.length || 0,
+      icon: FaRoute,
+      trend: "All Time",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
+    },
+    {
+      title: "Upcoming Trips",
+      value: upcomingTrips,
+      icon: FaCalendarAlt,
+      trend: "Planned",
+      color: "text-green-600",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+    },
+    {
+      title: "Past Trips",
+      value: completedTrips,
+      icon: FaStar,
+      trend: "Completed",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20",
+    },
+    {
+      title: "AI Requests Left",
+      value: remainingAiRequests === -1 ? "∞" : remainingAiRequests,
+      icon: FaRocket,
+      trend: user?.planType === "free" ? "Upgrade" : "Unlimited",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20",
+    },
+  ];
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-gradient-to-r from-primary-600 to-accent-600 rounded-lg p-6 text-white"
-      >
-        <h1 className="text-2xl font-bold mb-2">
-          Welcome back, {user?.name}! 👋
-        </h1>
-        <p className="text-primary-100">
-          Ready to plan your next adventure? Let's make it amazing!
-        </p>
-      </motion.div>
-
-      {/* Stats Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
-        {stats.map((stat, index) => (
-          <Link
-            key={stat.title}
-            to={stat.link}
-            className="card-hover p-6 transition-all duration-200 hover:scale-105"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-              <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
-              </div>
-            </div>
-          </Link>
-        ))}
-      </motion.div>
-
-      {/* Quick Actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
-            <Link
-              key={action.title}
-              to={action.link}
-              className={`${action.color} text-white rounded-lg p-6 hover:shadow-lg transition-all duration-200 hover:scale-105`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <action.icon className="h-8 w-8" />
-                <FaPlus className="h-4 w-4 opacity-75" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">{action.title}</h3>
-              <p className="text-sm opacity-90">{action.description}</p>
-            </Link>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Upcoming Trips */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Welcome Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="card p-6"
+          className="mb-6"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Upcoming Trips</h2>
-            <Link
-              to="/trips"
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-            >
-              View all
-            </Link>
-          </div>
-          
-          {tripsData?.trips?.length > 0 ? (
-            <div className="space-y-4">
-              {tripsData.trips.map((trip) => (
-                <div key={trip._id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <FaPlane className="h-6 w-6 text-primary-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {trip.title}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {trip.destination.city}, {trip.destination.country}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 text-right">
-                    <p className="text-sm text-gray-500">
-                      {new Date(trip.startDate).toLocaleDateString()}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {trip.preferences.duration} days
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <FaCalendarAlt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">No upcoming trips</p>
-              <Link
-                to="/planner"
-                className="btn-primary"
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 shadow-xl text-white">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <motion.h1
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-3xl font-bold"
+                >
+                  Welcome back, {user?.name}! 👋
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="mt-2 text-blue-100"
+                >
+                  Ready to plan your next adventure? Let's make it amazing.
+                </motion.p>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="mt-4 md:mt-0 flex items-center space-x-3"
               >
-                Plan Your First Trip
-              </Link>
+                <Badge
+                  variant={user?.planType === "free" ? "warning" : "success"}
+                  className="capitalize text-sm px-3 py-1"
+                >
+                  {user?.planType} Plan
+                </Badge>
+
+                {user?.planType === "free" && (
+                  <Link to="/billing">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="bg-white text-blue-600 hover:bg-blue-50"
+                    >
+                      <FaRocket className="mr-2" />
+                      Upgrade
+                    </Button>
+                  </Link>
+                )}
+              </motion.div>
             </div>
-          )}
+          </div>
         </motion.div>
 
-        {/* Recent Bookings */}
+        {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="card p-6"
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Recent Bookings</h2>
-            <Link
-              to="/bookings"
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+          {statsCards.map((stat, index) => (
+            <motion.div
+              key={stat.title}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 + index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -5 }}
             >
-              View all
-            </Link>
-          </div>
-          
-          {bookingsData?.bookings?.length > 0 ? (
-            <div className="space-y-4">
-              {bookingsData.bookings.slice(0, 3).map((booking) => (
-                <div key={booking._id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-shrink-0">
-                    {booking.type === 'hotel' ? (
-                      <FaHotel className="h-6 w-6 text-green-600" />
-                    ) : (
-                      <FaPlane className="h-6 w-6 text-blue-600" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {booking.type === 'hotel' ? 'Hotel Booking' : `${booking.type} Booking`}
+              <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                      {stat.title}
                     </p>
-                    <p className="text-sm text-gray-500">
-                      {booking.bookingReference}
-                    </p>
+                    <div className="flex items-baseline">
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                        {statsLoading ? (
+                          <LoadingSpinner size="sm" />
+                        ) : (
+                          stat.value
+                        )}
+                      </p>
+                      <span
+                        className={`ml-2 text-xs font-semibold px-2 py-1 rounded-full ${stat.bgColor} ${stat.color}`}
+                      >
+                        {stat.trend}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex-shrink-0 text-right">
-                    <span className={`badge ${
-                      booking.status === 'confirmed' ? 'badge-success' :
-                      booking.status === 'pending' ? 'badge-warning' :
-                      'badge-error'
-                    }`}>
-                      {booking.status}
-                    </span>
+                  <div
+                    className={`p-4 rounded-xl ${stat.bgColor} transform transition-transform group-hover:scale-110`}
+                  >
+                    <stat.icon className={`h-7 w-7 ${stat.color}`} />
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <FaClock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">No recent bookings</p>
-              <Link
-                to="/hotels"
-                className="btn-primary"
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-2"
+          >
+            <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                  <FaRocket className="mr-3 text-blue-600" />
+                  Quick Actions
+                </h2>
+                <Link
+                  to="/trip-planner"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 text-sm font-semibold flex items-center transition-colors"
+                >
+                  View All
+                  <FaArrowRight className="ml-2 h-3 w-3" />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {quickActions.map((action, index) => (
+                  <motion.div
+                    key={action.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link
+                      to={action.href}
+                      className={`block p-6 rounded-2xl text-white transition-all duration-300 transform shadow-lg hover:shadow-2xl ${action.color} ${action.hoverColor}`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                          <action.icon className="h-7 w-7" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg">{action.title}</h3>
+                          <p className="text-sm text-white/90 mt-1">
+                            {action.description}
+                          </p>
+                        </div>
+                        <FaArrowRight className="h-5 w-5" />
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* AI Recommendations */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                  AI Picks
+                </h2>
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                  <FaRocket className="h-5 w-5 text-white" />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {recommendations?.slice(0, 3).map((rec, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + index * 0.1 }}
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-start space-x-3 p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-xl cursor-pointer hover:shadow-md transition-all"
+                  >
+                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <FaGlobe className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                        {rec?.destination || "Tokyo, Japan"}
+                      </h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                        {rec?.description || "Perfect for culture and cuisine"}
+                      </p>
+                      <div className="flex items-center mt-2 space-x-2">
+                        <Badge
+                          variant="secondary"
+                          size="sm"
+                          className="font-semibold"
+                        >
+                          ₹{rec?.estimatedCost || "1,20,000"}
+                        </Badge>
+                        <Badge variant="secondary" size="sm">
+                          {rec?.duration || "7 days"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </motion.div>
+                )) || (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <FaRocket className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Start planning trips to get AI recommendations</p>
+                  </div>
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-4"
+                onClick={() => (window.location.href = "/trip-planner")}
               >
-                Book Your First Stay
+                Get More Recommendations
+              </Button>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Recent Trips */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-6"
+        >
+          <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <FaRoute className="mr-3 text-purple-600" />
+                My Trips
+              </h2>
+              <Link
+                to="/trips"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 text-sm font-semibold flex items-center transition-colors"
+              >
+                View All Trips
+                <FaArrowRight className="ml-2 h-3 w-3" />
               </Link>
             </div>
-          )}
+
+            {tripsLoading ? (
+              <div className="flex justify-center py-8">
+                <LoadingSpinner size="lg" />
+              </div>
+            ) : recentTrips?.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recentTrips.map((trip, index) => (
+                  <motion.div
+                    key={trip._id || trip.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                    whileHover={{ scale: 1.03, y: -5 }}
+                    className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200/50 dark:border-gray-700/50"
+                    onClick={() =>
+                      (window.location.href = `/trips/${trip._id || trip.id}`)
+                    }
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-white capitalize">
+                          {trip.destination?.city || trip.title || "Unknown"}
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(trip.startDate).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          )}{" "}
+                          -{" "}
+                          {new Date(trip.endDate).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          new Date(trip.endDate) < new Date()
+                            ? "success"
+                            : "warning"
+                        }
+                        size="sm"
+                      >
+                        {new Date(trip.endDate) < new Date()
+                          ? "Completed"
+                          : "Upcoming"}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
+                      <div className="flex items-center">
+                        <FaCalendarAlt className="h-4 w-4 mr-2" />
+                        <span>
+                          {trip.preferences?.duration ||
+                            trip.duration ||
+                            trip.itinerary?.days?.length ||
+                            "N/A"}{" "}
+                          days
+                        </span>
+                      </div>
+                      {trip.preferences?.travelStyle && (
+                        <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full capitalize">
+                          {trip.preferences.travelStyle}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Budget
+                        </p>
+                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                          ₹
+                          {(
+                            trip.preferences?.budget?.max ||
+                            trip.itinerary?.totalCost?.amount ||
+                            trip.totalCost ||
+                            0
+                          ).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Activities
+                        </p>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {trip.itinerary?.days?.reduce(
+                            (total, day) =>
+                              total + (day.activities?.length || 0),
+                            0
+                          ) || 0}{" "}
+                          planned
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl">
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-blue-400 rounded-full blur-2xl opacity-20 animate-pulse"></div>
+                  <FaPlane className="relative h-20 w-20 mx-auto text-blue-500 dark:text-blue-400 mb-4" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  No trips yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+                  Start planning your first adventure with AI assistance
+                </p>
+                <Link to="/trip-planner">
+                  <Button variant="primary" className="px-6 py-3">
+                    <FaPlus className="mr-2" />
+                    Plan Your First Trip
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </Card>
         </motion.div>
       </div>
     </div>

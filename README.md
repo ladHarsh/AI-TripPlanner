@@ -5,15 +5,20 @@ A comprehensive AI-powered travel planning application built with the MERN stack
 ## 🚀 Features
 
 ### Core Features
-- **AI-Powered Trip Planning**: Generate personalized itineraries using OpenAI API
+
+- **AI-Powered Trip Planning**: Generate personalized itineraries using Google Gemini AI
+- **Real Hotel Data**: Search and filter real hotels using Booking.com API via RapidAPI
 - **Live Location Tracking**: Real-time location services with Google Maps integration
 - **Hotel Booking System**: Search, filter, and book hotels with reviews and ratings
+- **Advanced Filtering**: Filter hotels by price, rating, category, amenities, and location
 - **Transport Booking**: Book flights, trains, buses, and taxis
 - **Uber/Taxi Integration**: Request rides directly from the app
-- **User Authentication**: Secure JWT-based authentication system
+- **User Authentication**: Secure JWT-based authentication with 7-day persistent login
 - **User Dashboard**: Manage bookings, trips, and preferences
+- **Activity-Specific Images**: 100+ activity categories with matching images for itineraries
 
 ### Technical Features
+
 - **Responsive Design**: Modern UI with Tailwind CSS
 - **Real-time Updates**: Live booking status and notifications
 - **Search & Filtering**: Advanced search with multiple filters
@@ -24,6 +29,7 @@ A comprehensive AI-powered travel planning application built with the MERN stack
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
 - **MongoDB** - Database
@@ -34,6 +40,7 @@ A comprehensive AI-powered travel planning application built with the MERN stack
 - **Google Maps API** - Location services
 
 ### Frontend
+
 - **React** - UI library
 - **React Router** - Client-side routing
 - **Tailwind CSS** - Styling
@@ -54,20 +61,22 @@ Before running this application, make sure you have the following installed:
 ## 🔧 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd ai-trip-planner
    ```
 
 2. **Install dependencies**
+
    ```bash
    # Install root dependencies
    npm install
-   
+
    # Install server dependencies
    cd server
    npm install
-   
+
    # Install client dependencies
    cd ../client
    npm install
@@ -76,6 +85,7 @@ Before running this application, make sure you have the following installed:
 3. **Environment Setup**
 
    Create a `.env` file in the `server` directory:
+
    ```env
    # Server Configuration
    PORT=5000
@@ -87,42 +97,72 @@ Before running this application, make sure you have the following installed:
 
    # JWT Configuration
    JWT_SECRET=your_jwt_secret_key_here
-   JWT_EXPIRE=7d
+   JWT_REFRESH_SECRET=your_jwt_refresh_secret_here
 
-   # OpenAI Configuration
+   # Google Gemini AI (for Trip Planning)
    GEMINI_API_KEY=your_gemini_api_key_here
 
-   # Google Maps API
+   # RapidAPI Hotel Integration (for Real Hotel Data)
+   RAPIDAPI_KEY=your_rapidapi_key_here
+   RAPIDAPI_HOST=booking-com15.p.rapidapi.com
+
+   # Google Maps API (Optional)
    GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 
    # Uber API (Optional)
    UBER_CLIENT_ID=your_uber_client_id_here
    UBER_CLIENT_SECRET=your_uber_client_secret_here
-
-   # External APIs (Flight/Train/Bus booking)
-   FLIGHT_API_KEY=your_flight_api_key_here
-   TRAIN_API_KEY=your_train_api_key_here
-   BUS_API_KEY=your_bus_api_key_here
    ```
 
-4. **API Keys Setup**
+4. **API Keys Setup** 🔑
 
-   You'll need to obtain the following API keys:
-   - **OpenAI API Key**: [Get it here](https://platform.openai.com/api-keys)
+   **Required API Keys (FREE):**
+
+   - **RapidAPI Key** (for Real Hotel Data):
+
+     1. Visit [RapidAPI Booking.com API](https://rapidapi.com/apidojo/api/booking-com15)
+     2. Sign up and subscribe to the **FREE** plan (500 requests/month)
+     3. Copy your `X-RapidAPI-Key`
+     4. Add to `.env`: `RAPIDAPI_KEY=your_key_here`
+
+   - **Google Gemini API Key** (for AI Trip Planning):
+     1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+     2. Create a new API key (FREE tier includes 60 req/min)
+     3. Add to `.env`: `GEMINI_API_KEY=your_key_here`
+
+   **Optional API Keys:**
+
    - **Google Maps API Key**: [Get it here](https://developers.google.com/maps/documentation/javascript/get-api-key)
-   - **MongoDB Atlas** (optional): [Get it here](https://www.mongodb.com/atlas)
+   - **MongoDB Atlas** (for production): [Get it here](https://www.mongodb.com/atlas)
+
+   📖 **Detailed setup guide**: See [API_SETUP.md](API_SETUP.md) for step-by-step instructions.
+
+5. **Test the APIs**
+
+   Before starting the app, test if your API keys work:
+
+   ```bash
+   # Test hotel API
+   cd server
+   node test-hotels.js
+
+   # Test Gemini AI
+   node test-gemini.js
+   ```
 
 ## 🚀 Running the Application
 
 ### Development Mode
 
 1. **Start the server**
+
    ```bash
    cd server
    npm run dev
    ```
 
 2. **Start the client** (in a new terminal)
+
    ```bash
    cd client
    npm start
@@ -136,6 +176,7 @@ Before running this application, make sure you have the following installed:
 ### Production Mode
 
 1. **Build the client**
+
    ```bash
    cd client
    npm run build
@@ -173,6 +214,7 @@ ai-trip-planner/
 ## 🔌 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/auth/me` - Get current user
@@ -180,6 +222,7 @@ ai-trip-planner/
 - `POST /api/auth/logout` - User logout
 
 ### Hotels
+
 - `GET /api/hotels` - Get all hotels
 - `GET /api/hotels/:id` - Get hotel details
 - `POST /api/hotels/:id/reviews` - Add review
@@ -187,6 +230,7 @@ ai-trip-planner/
 - `GET /api/hotels/nearby` - Get nearby hotels
 
 ### Transport
+
 - `GET /api/transport/flights` - Search flights
 - `GET /api/transport/trains` - Search trains
 - `GET /api/transport/buses` - Search buses
@@ -194,17 +238,20 @@ ai-trip-planner/
 - `POST /api/transport/taxi/request` - Request taxi
 
 ### Maps
+
 - `GET /api/maps/places/nearby` - Get nearby places
 - `GET /api/maps/directions` - Get directions
 - `GET /api/maps/geocode` - Geocode address
 - `POST /api/maps/save-location` - Save location
 
 ### AI Trip Planning
+
 - `POST /api/ai/generate-itinerary` - Generate AI itinerary
 - `POST /api/ai/optimize-itinerary` - Optimize itinerary
 - `POST /api/ai/travel-suggestions` - Get travel suggestions
 
 ### Trips & Bookings
+
 - `GET /api/trips` - Get user trips
 - `POST /api/trips` - Create trip
 - `GET /api/bookings` - Get user bookings
@@ -237,12 +284,14 @@ The application includes a comprehensive set of reusable UI components:
 ### Backend Deployment (Render/Heroku)
 
 1. **Prepare for deployment**
+
    ```bash
    cd server
    npm run build
    ```
 
 2. **Set environment variables** in your hosting platform:
+
    - `MONGODB_URI_PROD`
    - `JWT_SECRET`
    - `GEMINI_API_KEY`
@@ -254,12 +303,14 @@ The application includes a comprehensive set of reusable UI components:
 ### Frontend Deployment (Vercel)
 
 1. **Build the application**
+
    ```bash
    cd client
    npm run build
    ```
 
 2. **Deploy to Vercel**
+
    ```bash
    vercel --prod
    ```

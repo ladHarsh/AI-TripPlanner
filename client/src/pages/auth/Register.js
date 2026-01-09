@@ -1,269 +1,287 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { FaRoute, FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser, FaPhone } from 'react-icons/fa';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "../../contexts/AuthContext";
+import { useFormValidation } from "../../hooks/useFormValidation";
+import { Button, Input, Card } from "../../components/ui";
+import {
+  FaRoute,
+  FaEye,
+  FaEyeSlash,
+  FaEnvelope,
+  FaLock,
+  FaUser,
+  FaShieldAlt,
+  FaRocket,
+  FaGlobe,
+  FaHeart,
+} from "react-icons/fa";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { register: registerUser } = useAuth();
+  const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm();
+  const { values, errors, handleChange, handleBlur, isValid } =
+    useFormValidation(
+      {
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      },
+      {
+        name: {
+          required: true,
+          minLength: 2,
+        },
+        email: {
+          required: true,
+          email: true,
+        },
+        password: {
+          required: true,
+          minLength: 6,
+        },
+        confirmPassword: {
+          required: true,
+          validate: (value, allValues) => {
+            if (!allValues || !allValues.password) return null;
+            return value === allValues.password
+              ? null
+              : "Passwords do not match";
+          },
+        },
+      }
+    );
 
-  const password = watch('password');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isValid) return;
 
-  const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const result = await registerUser(data);
+      const result = await registerUser({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
       if (result.success) {
-        // Registration successful, user will be redirected by AuthContext
+        navigate("/dashboard");
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const features = [
+    { icon: FaRocket, text: "AI-powered trip planning" },
+    { icon: FaGlobe, text: "Interactive maps" },
+    { icon: FaShieldAlt, text: "Secure & private" },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8"
-      >
-        <div className="text-center">
-          <div className="flex justify-center">
-            <FaRoute className="h-12 w-12 text-primary-600" />
-          </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join AI Trip Planner and start planning your adventures
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 opacity-20 dark:opacity-10">
+        <div className="absolute top-10 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div
+          className="absolute bottom-10 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"
+          style={{ animationDelay: "2s" }}
+        ></div>
+      </div>
 
-        <div className="card p-8">
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="name"
-                  type="text"
-                  autoComplete="name"
-                  className={`input pl-10 ${errors.name ? 'input-error' : ''}`}
-                  placeholder="Enter your full name"
-                  {...register('name', {
-                    required: 'Name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'Name must be at least 2 characters',
-                    },
-                  })}
-                />
-              </div>
-              {errors.name && (
-                <p className="mt-1 text-sm text-error-600">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  className={`input pl-10 ${errors.email ? 'input-error' : ''}`}
-                  placeholder="Enter your email"
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-error-600">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number (Optional)
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaPhone className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="phone"
-                  type="tel"
-                  autoComplete="tel"
-                  className="input pl-10"
-                  placeholder="Enter your phone number"
-                  {...register('phone')}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  className={`input pl-10 pr-10 ${errors.password ? 'input-error' : ''}`}
-                  placeholder="Create a password"
-                  {...register('password', {
-                    required: 'Password is required',
-                    minLength: {
-                      value: 6,
-                      message: 'Password must be at least 6 characters',
-                    },
-                  })}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <FaEye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-error-600">{errors.password.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  className={`input pl-10 pr-10 ${errors.confirmPassword ? 'input-error' : ''}`}
-                  placeholder="Confirm your password"
-                  {...register('confirmPassword', {
-                    required: 'Please confirm your password',
-                    validate: (value) =>
-                      value === password || 'Passwords do not match',
-                  })}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <FaEye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-error-600">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-
-            <div className="flex items-center">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                {...register('terms', {
-                  required: 'You must accept the terms and conditions',
-                })}
-              />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-                I agree to the{' '}
-                <a href="/terms" className="text-primary-600 hover:text-primary-500">
-                  Terms and Conditions
-                </a>{' '}
-                and{' '}
-                <a href="/privacy" className="text-primary-600 hover:text-primary-500">
-                  Privacy Policy
-                </a>
-              </label>
-            </div>
-            {errors.terms && (
-              <p className="text-sm text-error-600">{errors.terms.message}</p>
-            )}
-
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="btn-primary w-full flex justify-center items-center"
+      <div className="max-w-2xl w-full mx-auto relative z-10">
+        {/* Registration Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="w-full flex items-center justify-center p-4"
+        >
+          <div className="w-full">
+            <div className="text-center mb-8">
+              <motion.div
+                className="flex justify-center mb-4"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
               >
-                {isLoading ? (
-                  <>
-                    <LoadingSpinner size="sm" className="mr-2" />
-                    Creating account...
-                  </>
-                ) : (
-                  'Create account'
-                )}
-              </button>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-75"></div>
+                  <div className="relative bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-xl">
+                    <FaRoute className="h-10 w-10 text-blue-600" />
+                  </div>
+                </div>
+              </motion.div>
+              <motion.h2
+                className="text-3xl font-bold text-gray-900 dark:text-white mb-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                AI Trip Planner
+              </motion.h2>
+              <motion.p
+                className="text-gray-600 dark:text-gray-400"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                Create Your Account
+              </motion.p>
             </div>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link
-                  to="/login"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+            <Card className="p-8 shadow-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <Input
+                    name="name"
+                    type="text"
+                    label="Full Name"
+                    placeholder="Enter your full name"
+                    icon={FaUser}
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.name}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    name="email"
+                    type="email"
+                    label="Email Address"
+                    placeholder="Enter your email"
+                    icon={FaEnvelope}
+                    value={values.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.email}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    label="Password"
+                    placeholder="Create a strong password"
+                    icon={FaLock}
+                    value={values.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.password}
+                    required
+                    rightElement={
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </button>
+                    }
+                  />
+
+                  {/* Password Requirement */}
+                  <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                    <div
+                      className={`flex items-center ${
+                        values.password && values.password.length >= 6
+                          ? "text-green-600"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      <span className="mr-1">✓</span>
+                      Minimum 6 characters required
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Input
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    label="Confirm Password"
+                    placeholder="Confirm your password"
+                    icon={FaLock}
+                    value={values.confirmPassword}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={errors.confirmPassword}
+                    required
+                    rightElement={
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                      </button>
+                    }
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                  disabled={!isValid || isLoading}
+                  loading={isLoading}
                 >
-                  Sign in here
-                </Link>
-              </p>
-            </div>
-          </form>
-        </div>
-      </motion.div>
+                  {isLoading ? "Creating account..." : "Create my account"}
+                </Button>
+
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Already have an account?{" "}
+                    <Link
+                      to="/login"
+                      className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700"
+                    >
+                      Sign in here
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </Card>
+
+            {/* Trust Indicators */}
+            <motion.div
+              className="mt-8 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+            >
+              <div className="flex items-center justify-center space-x-6 text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center">
+                  <FaShieldAlt className="h-4 w-4 mr-1.5 text-green-500" />
+                  <span>Secure & Private</span>
+                </div>
+                <div className="flex items-center">
+                  <FaRocket className="h-4 w-4 mr-1.5 text-purple-500" />
+                  <span>Free to Start</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
