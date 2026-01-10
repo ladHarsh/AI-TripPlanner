@@ -16,7 +16,7 @@ const Layout = ({
   const { isAuthenticated } = useAuth();
   const { theme } = useTheme();
 
-  // Add theme class to body
+  // Apply dark mode class
   React.useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
@@ -27,84 +27,72 @@ const Layout = ({
 
   const shouldShowSidebar = showSidebar && isAuthenticated;
 
-  // For navbar only (like Maps page)
+  // 1. Full Screen Layout (Auth pages)
+  if (fullScreen) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {children || <Outlet />}
+      </div>
+    );
+  }
+
+  // 2. Navbar Only Layout
   if (showNavbarOnly) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-200">
+      <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navbar />
         <main className="flex-1">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="h-full"
-          >
-            {children || <Outlet />}
-          </motion.div>
+          {children || <Outlet />}
         </main>
       </div>
     );
   }
 
-  // For full-screen layouts (like auth pages)
-  if (fullScreen) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="h-full"
-        >
-          {children || <Outlet />}
-        </motion.div>
-      </div>
-    );
-  }
-
+  // 3. MAIN LAYOUT (Sandwich Style: Nav -> Content -> Footer)
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-200">
-      <Navbar />
+    // changed 'h-screen' to 'min-h-screen' so the page grows with content
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      
+      {/* TOP: Sticky Navbar */}
+      {/* sticky top-0 ensures it stays at the top while scrolling */}
+      <div className="sticky top-0 z-50 w-full">
+        <Navbar />
+      </div>
 
-      <div className="flex flex-1">
-        {/* Sidebar - only show if authenticated and enabled */}
+      {/* MIDDLE: Sidebar + Content */}
+      {/* flex-1 pushes the footer down if content is short */}
+      <div className="flex flex-1 relative">
+        
+        {/* Left: Sidebar */}
         {shouldShowSidebar && (
-          <motion.aside
-            initial={{ x: -280 }}
-            animate={{ x: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="hidden lg:flex lg:flex-shrink-0"
-          >
-            <Sidebar />
-          </motion.aside>
+           // sticky top-16 (adjust based on Navbar height) ensures Sidebar stays visible 
+           // while you scroll down the content
+           <aside className="hidden lg:block w-72 flex-shrink-0 sticky top-[64px] h-[calc(100vh-64px)] overflow-y-auto">
+              <Sidebar />
+           </aside>
         )}
 
-        {/* Main Content */}
-        <main
-          className={`flex-1 transition-all duration-300 ${
-            shouldShowSidebar ? "lg:ml-0" : ""
-          }`}
-        >
+        {/* Right: Main Content */}
+        {/* UPDATED: Removed p-4 md:p-6 lg:p-8 */}
+        <main className="flex-1 w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="h-full min-h-[calc(100vh-64px)]"
+            transition={{ duration: 0.3 }}
           >
             {children || <Outlet />}
           </motion.div>
         </main>
       </div>
 
-      <Footer />
+      {/* BOTTOM: Full Width Footer */}
+      {/* z-10 ensures it sits correctly in the stacking order */}
+      <div className="w-full z-10 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+         <Footer />
+      </div>
+
     </div>
   );
 };
 
-// Enhanced Layout with contexts and error boundary
-export const LayoutWithProviders = ({ children, ...props }) => {
-  return <Layout {...props}>{children}</Layout>;
-};
-
-export { Layout };
 export default Layout;
