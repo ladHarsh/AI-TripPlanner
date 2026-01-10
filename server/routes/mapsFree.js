@@ -17,10 +17,19 @@ router.get("/geocode", cacheMiddleware(86400), async (req, res) => {
     const result = await freeMapService.geocode(address);
     return res.json({ success: true, result });
   } catch (err) {
-    logger.error("/maps-free/geocode error", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Error geocoding address" });
+    logger.error("/maps-free/geocode error:", {
+      message: err.message,
+      stack: err.stack,
+      address: req.query.address,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error geocoding address",
+      ...(process.env.NODE_ENV === "development" && {
+        error: err.message,
+        details: err.response?.data,
+      }),
+    });
   }
 });
 

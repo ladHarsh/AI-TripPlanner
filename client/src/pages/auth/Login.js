@@ -168,7 +168,7 @@ const Login = () => {
 
                   <Link
                     to="/forgot-password"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                    className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700"
                   >
                     Forgot password?
                   </Link>
@@ -178,7 +178,7 @@ const Login = () => {
                   type="submit"
                   variant="primary"
                   size="lg"
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                   disabled={!isValid || isLoading}
                   loading={isLoading}
                 >
@@ -190,7 +190,7 @@ const Login = () => {
                     Don't have an account?{" "}
                     <Link
                       to="/register"
-                      className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                      className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700"
                     >
                       Sign up for free
                     </Link>

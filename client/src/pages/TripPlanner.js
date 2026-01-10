@@ -9,7 +9,7 @@ import { Button, Input, Card, LoadingSpinner } from "../components/ui";
 import { aiAPI, tripAPI } from "../services/api";
 import TripResultCard from "../components/trip/TripResultCard";
 import TripDetailView from "../components/trip/TripDetailView";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   FaPlane,
   FaMapMarkedAlt,
@@ -36,11 +36,13 @@ const TripPlanner = () => {
   const { user, getRemainingAiRequests } = useAuth();
   const notifications = useNotifications();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const editTripId = searchParams.get("edit");
 
   const [currentStep, setCurrentStep] = useState(1);
   const [generatedItinerary, setGeneratedItinerary] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [showDetailView, setShowDetailView] = useState(false);
 
   const { values, errors, handleChange, handleBlur, isValid, setValues } =
@@ -206,7 +208,7 @@ const TripPlanner = () => {
         max: 160000,
       };
 
-      // Prepare data for backend
+      // Prepare data for AI itinerary generation
       const itineraryData = {
         destination: values.destination,
         duration,
@@ -232,6 +234,83 @@ const TripPlanner = () => {
       console.error("Error generating itinerary:", error);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!isValid) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    setIsSavingDraft(true);
+    try {
+      // Calculate duration in days
+      const start = new Date(values.startDate);
+      const end = new Date(values.endDate);
+      const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+      // Map budget to numeric range
+      const budgetRanges = {
+        budget: { min: 8000, max: 80000 },
+        "mid-range": { min: 80000, max: 240000 },
+        luxury: { min: 240000, max: 800000 },
+      };
+
+      const budgetRange = budgetRanges[values.budget] || {
+        min: 40000,
+        max: 160000,
+      };
+
+      // Prepare trip data for saving as draft
+      const tripData = {
+        title: `Trip to ${values.destination}`,
+        destination: {
+          city: values.destination.split(",")[0].trim(),
+          country:
+            values.destination.split(",")[1]?.trim() || values.destination,
+        },
+        startDate: values.startDate,
+        endDate: values.endDate,
+        preferences: {
+          duration,
+          budget: {
+            min: budgetRange.min,
+            max: budgetRange.max,
+            currency: "INR",
+          },
+          travelStyle: values.travelStyle || "mid-range",
+          interests: values.interests || [],
+          groupSize: parseInt(values.travelers) || 1,
+          accommodation: values.accommodationType || "hotel",
+          transport: values.transportation
+            ? [values.transportation]
+            : ["flexible"],
+        },
+        notes: values.specialRequests || "",
+        status: "draft", // Save as draft status
+      };
+
+      // Save trip draft
+      const response = await tripAPI.createTrip(tripData);
+
+      if (response.data.success) {
+        toast.success(
+          "Trip draft saved successfully! You can view it in My Trips."
+        );
+        // Redirect to trips page after a short delay
+        setTimeout(() => {
+          navigate("/trips");
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error saving trip draft:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to save trip draft. Please try again."
+      );
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
@@ -302,26 +381,36 @@ const TripPlanner = () => {
                 const isCompleted = currentStep > stepNumber;
 
                 return (
-                  <div key={stepNumber} className="flex items-center">
+                  <div key={stepNumber} className="flex items-center flex-1">
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-all duration-300 ${
+                      className={`flex flex-col items-center justify-center px-3 py-2 rounded-2xl border-2 transition-all duration-300 flex-1 min-w-0 ${
                         isActive || isCompleted
                           ? "border-transparent bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                           : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-400"
                       }`}
                     >
-                      {isCompleted ? (
-                        <FaCheckCircle className="h-6 w-6" />
-                      ) : (
-                        <span className="text-base font-bold">
-                          {stepNumber}
-                        </span>
-                      )}
+                      <div className="flex items-center space-x-2 mb-1">
+                        {isCompleted ? (
+                          <FaCheckCircle className="h-5 w-5" />
+                        ) : (
+                          <span className="text-sm font-bold">
+                            {stepNumber}
+                          </span>
+                        )}
+                      </div>
+                      <span
+                        className={`text-xs font-semibold text-center truncate w-full ${
+                          isActive || isCompleted
+                            ? "text-white"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}
+                      >
+                        {title}
+                      </span>
                     </motion.div>
                     {index < stepTitles.length - 1 && (
                       <div
-                        className={`w-12 h-1 ml-3 rounded-full transition-all duration-300 ${
+                        className={`w-8 h-1 mx-2 rounded-full transition-all duration-300 ${
                           isCompleted
                             ? "bg-gradient-to-r from-blue-600 to-purple-600"
                             : "bg-gray-300 dark:bg-gray-600"
@@ -447,7 +536,7 @@ const TripPlanner = () => {
                       key={interest.id}
                       type="button"
                       onClick={() => handleInterestChange(interest.id)}
-                      whileHover={{ scale: 1.05, y: -3 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
                       className={`p-4 rounded-xl border-2 transition-all duration-300 text-center ${
                         values.interests?.includes(interest.id)
@@ -486,7 +575,7 @@ const TripPlanner = () => {
                           travelStyle: style.id,
                         }))
                       }
-                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`p-5 rounded-xl border-2 transition-all duration-300 text-left ${
                         values.travelStyle === style.id
@@ -637,7 +726,7 @@ const TripPlanner = () => {
                 </div>
 
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.95 }}
                   className="inline-block"
                 >
@@ -692,7 +781,7 @@ const TripPlanner = () => {
           {currentStep < 4 && (
             <div className="flex justify-between mt-8 gap-4">
               <motion.div
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
@@ -707,21 +796,19 @@ const TripPlanner = () => {
               </motion.div>
 
               <motion.div
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
-                  onClick={
-                    currentStep === 3 ? handleGenerateItinerary : nextStep
-                  }
+                  onClick={currentStep === 3 ? handleSaveDraft : nextStep}
                   disabled={
                     (currentStep === 1 && !values.destination) ||
-                    (currentStep === 3 && isGenerating)
+                    (currentStep === 3 && (isGenerating || isSavingDraft))
                   }
-                  loading={currentStep === 3 && isGenerating}
+                  loading={currentStep === 3 && isSavingDraft}
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold shadow-lg"
                 >
-                  {currentStep === 3 ? "Generate Itinerary" : "Next"}
+                  {currentStep === 3 ? "Save as Draft" : "Next"}
                   {currentStep === 3 ? (
                     <FaMagic className="ml-2" />
                   ) : (

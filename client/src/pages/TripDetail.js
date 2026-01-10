@@ -350,7 +350,7 @@ const TripDetail = () => {
             <div className="p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50">
               <div className="flex flex-wrap gap-3">
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button
@@ -363,7 +363,7 @@ const TripDetail = () => {
                   </Button>
                 </motion.div>
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button
@@ -377,7 +377,7 @@ const TripDetail = () => {
                 </motion.div>
                 <div className="ml-auto flex gap-3">
                   <motion.div
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button
@@ -389,7 +389,7 @@ const TripDetail = () => {
                     </Button>
                   </motion.div>
                   <motion.div
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button

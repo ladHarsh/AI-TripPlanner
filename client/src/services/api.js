@@ -124,6 +124,7 @@ export const aiAPI = {
   getDestinationInsights: (destinationData) =>
     api.post("/ai/destination-insights", destinationData),
   getRecommendations: () => api.get("/ai/recommendations"),
+  refreshRecommendations: () => api.post("/ai/recommendations/refresh"),
 };
 
 // Trip API calls

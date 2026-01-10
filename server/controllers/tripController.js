@@ -27,7 +27,24 @@ const createTrip = async (req, res) => {
       notes,
       isPublic,
       tags,
+      status,
     } = req.body;
+
+    // Determine status based on new rules
+    // If status is explicitly provided, use it
+    // If itinerary.days exists and has length > 0, set to 'upcoming', else 'draft'
+    let tripStatus;
+    if (status) {
+      tripStatus = status;
+    } else if (
+      itinerary &&
+      Array.isArray(itinerary.days) &&
+      itinerary.days.length > 0
+    ) {
+      tripStatus = "upcoming";
+    } else {
+      tripStatus = "draft";
+    }
 
     // Create trip
     const trip = await Trip.create({
@@ -37,6 +54,7 @@ const createTrip = async (req, res) => {
       destination,
       preferences,
       itinerary,
+      status: tripStatus,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       notes,
@@ -263,7 +281,24 @@ const updateTrip = async (req, res) => {
     if (notes !== undefined) updateData.notes = notes;
     if (isPublic !== undefined) updateData.isPublic = isPublic;
     if (tags !== undefined) updateData.tags = tags;
-    if (status !== undefined) updateData.status = status;
+    
+    // Determine status based on new rules
+    // If status is explicitly provided, use it
+    // If itinerary.days exists and has length > 0, set to 'upcoming', else 'draft'
+    if (status !== undefined) {
+      updateData.status = status;
+    } else if (itinerary !== undefined) {
+      // Auto-determine status when itinerary is being updated
+      if (
+        itinerary &&
+        Array.isArray(itinerary.days) &&
+        itinerary.days.length > 0
+      ) {
+        updateData.status = "upcoming";
+      } else {
+        updateData.status = "draft";
+      }
+    }
 
     trip = await Trip.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -454,7 +489,7 @@ const cloneTrip = async (req, res) => {
       recommendations: originalTrip.recommendations,
       notes: originalTrip.notes,
       tags: originalTrip.tags,
-      status: "planning", // Reset status to planning
+      status: "draft", // Reset status to draft
       isPublic: false, // Make private by default
     };
 
@@ -508,7 +543,7 @@ const getTripStats = async (req, res) => {
             $sum: { $cond: [{ $eq: ["$status", "ongoing"] }, 1, 0] },
           },
           plannedTrips: {
-            $sum: { $cond: [{ $eq: ["$status", "planning"] }, 1, 0] },
+            $sum: { $cond: [{ $eq: ["$status", "draft"] }, 1, 0] },
           },
           totalCost: {
             $sum: "$itinerary.totalCost.amount",

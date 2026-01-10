@@ -10,9 +10,11 @@ class FreeMapService {
     this.nominatimBase = "https://nominatim.openstreetmap.org";
     this.overpassUrl = "https://overpass-api.de/api/interpreter";
     this.osrmBase = "https://router.project-osrm.org"; // Public OSRM instance
+    // Nominatim requires descriptive User-Agent
     this.userAgent =
       process.env.MAPS_USER_AGENT ||
-      "AI-TripPlanner/1.0 (contact: support@example.com)";
+      "AI-TripPlanner/1.0 (Educational Project; Node.js Application)";
+    this.referer = "http://localhost:3000";
   }
 
   // Validate coordinates
@@ -46,36 +48,70 @@ class FreeMapService {
     return deg * (Math.PI / 180);
   }
 
-  // Geocode address using Nominatim
+  // Geocode address using Nominatim with fallback
   async geocode(address) {
     try {
       const cacheKey = `free:geocode:${address}`;
       const cached = await cache.get(cacheKey);
       if (cached) return cached;
-      const response = await axios.get(`${this.nominatimBase}/search`, {
-        params: {
-          q: address,
-          format: "json",
-          addressdetails: 1,
-          limit: 1,
-        },
-        headers: { "User-Agent": this.userAgent },
-      });
+      
+      // Add delay to respect Nominatim's usage policy (max 1 request per second)
+      await sleep(1500); // Increased to 1.5 seconds for safety
+      
+      let response;
+      try {
+        // Try Nominatim first
+        response = await axios.get(`${this.nominatimBase}/search`, {
+          params: {
+            q: address,
+            format: "json",
+            addressdetails: 1,
+            limit: 1,
+          },
+          headers: {
+            "User-Agent": this.userAgent,
+            Referer: this.referer,
+          },
+          timeout: 10000,
+        });
+      } catch (nominatimError) {
+        // If Nominatim fails with 403, try alternative service
+        if (nominatimError.response?.status === 403) {
+          logger.warn("Nominatim blocked, using fallback geocoder");
+          response = await axios.get("https://geocode.maps.co/search", {
+            params: {
+              q: address,
+              format: "json",
+            },
+            timeout: 10000,
+          });
+        } else {
+          throw nominatimError;
+        }
+      }
+      
       if (!response.data || response.data.length === 0) {
+        logger.warn(`No geocode results for: ${address}`);
         throw new Error("No results found");
       }
+      
       const r = response.data[0];
       const result = {
         formatted_address: r.display_name,
         location: { lat: parseFloat(r.lat), lng: parseFloat(r.lon) },
-        place_id: r.osm_id,
+        place_id: r.osm_id || r.place_id,
         types: r.type ? [r.type] : [],
         address_components: r.address || {},
       };
       await cache.set(cacheKey, result, 86400);
       return result;
     } catch (err) {
-      logger.error("Free geocode error", err.message);
+      logger.error("Free geocode error:", {
+        message: err.message,
+        address,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+      });
       throw err;
     }
   }

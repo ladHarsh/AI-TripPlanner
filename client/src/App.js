@@ -16,6 +16,7 @@ import TripPlanner from "./pages/TripPlanner";
 import Trips from "./pages/Trips";
 import TripDetail from "./pages/TripDetail";
 import Maps from "./pages/Maps";
+import ProfileNew from "./pages/ProfileNew";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -122,6 +123,17 @@ function App() {
                 <ProtectedRoute>
                   <Layout showNavbarOnly>
                     <Maps />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Layout showSidebar>
+                    <ProfileNew />
                   </Layout>
                 </ProtectedRoute>
               }

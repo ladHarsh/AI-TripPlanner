@@ -180,7 +180,7 @@ const Profile = () => {
                 </div>
                 {!isEditing && (
                   <motion.div
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button
@@ -208,7 +208,7 @@ const Profile = () => {
             {stats.map((stat, index) => (
               <motion.div
                 key={stat.label}
-                whileHover={{ scale: 1.05, y: -5 }}
+                whileHover={{ scale: 1.02 }}
                 className="cursor-pointer"
               >
                 <Card className="p-5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl hover:shadow-xl transition-all">
@@ -384,7 +384,7 @@ const Profile = () => {
                 {isEditing && (
                   <div className="flex gap-3 pt-4">
                     <motion.div
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
                       className="flex-1"
                     >
@@ -404,7 +404,7 @@ const Profile = () => {
                       </Button>
                     </motion.div>
                     <motion.div
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       <Button

@@ -28,18 +28,7 @@ const Trips = () => {
 
   const filteredTrips =
     trips?.filter((trip) => {
-      // Filter by status
-      if (filter !== "all") {
-        const now = new Date();
-        const startDate = new Date(trip.startDate);
-        const endDate = new Date(trip.endDate);
-
-        if (filter === "upcoming" && startDate < now) return false;
-        if (filter === "past" && endDate > now) return false;
-        if (filter === "draft" && trip.status !== "draft") return false;
-      }
-
-      // Filter by search query
+      // First apply search filter if there's a query
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const destinationStr = trip.destination?.city
@@ -47,33 +36,65 @@ const Trips = () => {
           : typeof trip.destination === "string"
           ? trip.destination.toLowerCase()
           : "";
-        return (
+        const matchesSearch =
           destinationStr.includes(query) ||
           trip.description?.toLowerCase().includes(query) ||
-          trip.title?.toLowerCase().includes(query)
-        );
+          trip.title?.toLowerCase().includes(query);
+
+        if (!matchesSearch) return false;
+      }
+
+      // Then apply status/date filters
+      if (filter === "draft") {
+        // Show only drafts
+        return trip.status === "draft";
+      }
+
+      if (filter === "all") {
+        // Exclude drafts from "All Trips" and show upcoming/completed
+        const now = new Date();
+        const endDate = new Date(trip.endDate);
+        // Show upcoming and completed trips
+        return trip.status !== "draft";
+      }
+
+      // For upcoming and past filters
+      const now = new Date();
+      const startDate = new Date(trip.startDate);
+      const endDate = new Date(trip.endDate);
+
+      if (filter === "upcoming") {
+        // Show only upcoming trips (not drafts, start date in future)
+        return trip.status === "upcoming" && startDate >= now;
+      }
+
+      if (filter === "past") {
+        // Show completed trips (end date has passed)
+        return endDate < now;
       }
 
       return true;
     }) || [];
 
   const getStatusVariant = (trip) => {
+    if (trip.status === "draft") return "secondary";
+
     const now = new Date();
     const startDate = new Date(trip.startDate);
     const endDate = new Date(trip.endDate);
 
-    if (trip.status === "draft") return "secondary";
     if (endDate < now) return "success";
     if (startDate <= now && endDate >= now) return "warning";
     return "primary";
   };
 
   const getStatusLabel = (trip) => {
+    if (trip.status === "draft") return "Draft";
+
     const now = new Date();
     const startDate = new Date(trip.startDate);
     const endDate = new Date(trip.endDate);
 
-    if (trip.status === "draft") return "Draft";
     if (endDate < now) return "Completed";
     if (startDate <= now && endDate >= now) return "In Progress";
     return "Upcoming";
@@ -100,7 +121,7 @@ const Trips = () => {
                 </p>
               </div>
               <motion.div
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 className="mt-4 md:mt-0"
               >
@@ -176,7 +197,7 @@ const Trips = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.03, y: -5 }}
+                whileHover={{ scale: 1.02 }}
               >
                 <Link to={`/trips/${trip._id || trip.id}`}>
                   <Card className="h-full p-5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl rounded-2xl transition-all duration-300">
@@ -199,15 +220,23 @@ const Trips = () => {
                     <div className="space-y-3">
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                          {trip.destination?.city || trip.destination}
+                          {trip.destination?.city ||
+                            trip.title ||
+                            trip.destination}
                           {trip.destination?.country &&
                             trip.destination.city !==
                               trip.destination.country &&
                             `, ${trip.destination.country}`}
                         </h3>
-                        {trip.description && (
+                        {(trip.description || trip.title) && (
                           <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                            {trip.description}
+                            {trip.description || trip.title}
+                          </p>
+                        )}
+                        {trip.status === "draft" && (
+                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 italic">
+                            {trip.preferences?.duration || 0}-day trip to{" "}
+                            {trip.destination?.city || trip.destination}
                           </p>
                         )}
                       </div>
@@ -244,12 +273,14 @@ const Trips = () => {
                           </span>
                         </div>
 
-                        {trip.budget && (
+                        {(trip.budget || trip.preferences?.budget) && (
                           <div className="flex items-center text-sm font-bold text-gray-900 dark:text-white">
                             <FaDollarSign className="mr-1" />
                             <span>
-                              {trip.budget.max
-                                ? `₹${trip.budget.max}`
+                              {trip.preferences?.budget?.max
+                                ? `₹${trip.preferences.budget.max.toLocaleString()}`
+                                : trip.budget?.max
+                                ? `₹${trip.budget.max.toLocaleString()}`
                                 : trip.budget}
                             </span>
                           </div>
@@ -296,7 +327,7 @@ const Trips = () => {
               </p>
               {!searchQuery && filter === "all" && (
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <Link to="/trip-planner">

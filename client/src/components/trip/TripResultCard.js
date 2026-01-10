@@ -35,6 +35,12 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
 
       // Prepare trip data for saving
       const tripData = {
+        title: `Trip to ${itinerary.destination || formValues.destination}`,
+        description:
+          itinerary.overview ||
+          `${formValues.duration} day trip to ${
+            itinerary.destination || formValues.destination
+          }`,
         destination: itinerary.destination || formValues.destination,
         startDate: formValues.startDate,
         endDate: formValues.endDate,
@@ -55,7 +61,8 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
           recommendations: itinerary.recommendations || {},
           totalEstimatedCost: itinerary.totalEstimatedCost,
         },
-        status: "draft",
+        // Generated trips should have status "upcoming"
+        status: "upcoming",
       };
 
       const response = await tripAPI.createTrip(tripData);

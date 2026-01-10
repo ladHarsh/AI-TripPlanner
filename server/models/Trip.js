@@ -159,8 +159,8 @@ const tripSchema = new mongoose.Schema(
     // Trip status
     status: {
       type: String,
-      enum: ["planning", "booked", "ongoing", "completed", "cancelled"],
-      default: "planning",
+      enum: ["draft", "upcoming", "ongoing", "completed", "cancelled"],
+      default: "draft",
     },
 
     // Trip dates
@@ -246,7 +246,7 @@ tripSchema.methods.updateStatus = function (newStatus) {
   this.status = newStatus;
 
   // Auto-update status based on dates
-  if (newStatus === "booked" && this.startDate) {
+  if (newStatus === "upcoming" && this.startDate) {
     const now = new Date();
     if (now >= this.startDate && now <= this.endDate) {
       this.status = "ongoing";

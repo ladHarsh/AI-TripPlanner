@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useApi } from "../hooks/useApi";
 import { userAPI, tripAPI, aiAPI } from "../services/api";
@@ -18,19 +19,41 @@ import {
 } from "react-icons/fa";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { user, hasPermission, getRemainingAiRequests } = useAuth();
-  const { data: stats, isLoading: statsLoading } = useApi(["userStats"], () =>
-    userAPI.getUserStats().then((res) => res.data)
-  );
   const { data: recentTrips, isLoading: tripsLoading } = useApi(
     ["userTrips"],
     () => tripAPI.getTrips().then((res) => res.data.trips || res.data)
   );
-  const { data: recommendations } = useApi(["aiRecommendations"], () =>
-    aiAPI.getRecommendations().then((res) => res.data)
+  const { 
+    data: recommendations, 
+    isLoading: recommendationsLoading,
+    error: recommendationsError,
+    refetch: refetchRecommendations 
+  } = useApi(
+    ["aiRecommendations"], 
+    () => aiAPI.getRecommendations().then((res) => res.data.data || res.data)
   );
 
   const remainingAiRequests = getRemainingAiRequests();
+
+  // Function to refresh recommendations
+  const handleRefreshRecommendations = async () => {
+    try {
+      // Call refresh endpoint (clears cache and generates new recommendations)
+      await aiAPI.refreshRecommendations();
+      // Refetch to update UI
+      await refetchRecommendations();
+      toast.success("New trip recommendations generated!");
+    } catch (error) {
+      console.error("Error refreshing recommendations:", error);
+      toast.error("Failed to generate new recommendations");
+    }
+  };
+
+  // Filter out draft trips (status === "draft") from dashboard
+  const nonDraftTrips =
+    recentTrips?.filter((trip) => trip.status !== "draft") || [];
 
   const quickActions = [
     {
@@ -51,25 +74,26 @@ const Dashboard = () => {
     },
   ];
 
-  // Calculate upcoming and completed trips
+  // Calculate upcoming and completed trips (excluding drafts)
   const upcomingTrips =
-    recentTrips?.filter((trip) => {
+    nonDraftTrips?.filter((trip) => {
       const startDate = new Date(trip.startDate);
       const now = new Date();
       return startDate > now;
     }).length || 0;
 
   const completedTrips =
-    recentTrips?.filter((trip) => {
+    nonDraftTrips?.filter((trip) => {
       const endDate = new Date(trip.endDate);
       const now = new Date();
+      // Show trips where end date has passed
       return endDate < now;
     }).length || 0;
 
   const statsCards = [
     {
       title: "Total Trips Generated",
-      value: recentTrips?.length || 0,
+      value: nonDraftTrips?.length || 0,
       icon: FaRoute,
       trend: "All Time",
       color: "text-blue-600",
@@ -174,22 +198,21 @@ const Dashboard = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 + index * 0.1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
             >
-              <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                       {stat.title}
                     </p>
                     <div className="flex items-baseline">
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                        {statsLoading ? (
+                      <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                        {tripsLoading ? (
                           <LoadingSpinner size="sm" />
                         ) : (
                           stat.value
                         )}
-                      </p>
+                      </div>
                       <span
                         className={`ml-2 text-xs font-semibold px-2 py-1 rounded-full ${stat.bgColor} ${stat.color}`}
                       >
@@ -198,7 +221,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div
-                    className={`p-4 rounded-xl ${stat.bgColor} transform transition-transform group-hover:scale-110`}
+                    className={`p-4 rounded-xl ${stat.bgColor}`}
                   >
                     <stat.icon className={`h-7 w-7 ${stat.color}`} />
                   </div>
@@ -217,18 +240,11 @@ const Dashboard = () => {
             className="lg:col-span-2"
           >
             <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
                   <FaRocket className="mr-3 text-blue-600" />
                   Quick Actions
                 </h2>
-                <Link
-                  to="/trip-planner"
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 text-sm font-semibold flex items-center transition-colors"
-                >
-                  View All
-                  <FaArrowRight className="ml-2 h-3 w-3" />
-                </Link>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -238,7 +254,7 @@ const Dashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <Link
@@ -273,7 +289,7 @@ const Dashboard = () => {
             <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-                  AI Picks
+                  AI Recommended Trips
                 </h2>
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                   <FaRocket className="h-5 w-5 text-white" />
@@ -281,43 +297,59 @@ const Dashboard = () => {
               </div>
 
               <div className="space-y-3">
-                {recommendations?.slice(0, 3).map((rec, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                    whileHover={{ scale: 1.02 }}
-                    className="flex items-start space-x-3 p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-xl cursor-pointer hover:shadow-md transition-all"
-                  >
-                    <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <FaGlobe className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                        {rec?.destination || "Tokyo, Japan"}
-                      </h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
-                        {rec?.description || "Perfect for culture and cuisine"}
-                      </p>
-                      <div className="flex items-center mt-2 space-x-2">
-                        <Badge
-                          variant="secondary"
-                          size="sm"
-                          className="font-semibold"
-                        >
-                          ₹{rec?.estimatedCost || "1,20,000"}
-                        </Badge>
-                        <Badge variant="secondary" size="sm">
-                          {rec?.duration || "7 days"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </motion.div>
-                )) || (
+                {recommendationsError ? (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <FaRocket className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>Start planning trips to get AI recommendations</p>
+                    <p className="text-sm">
+                      {recommendationsError.message?.includes("401") || recommendationsError.message?.includes("Unauthorized")
+                        ? "Please log in to see personalized recommendations"
+                        : "Unable to load recommendations"}
+                    </p>
+                  </div>
+                ) : recommendationsLoading ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <FaRocket className="h-8 w-8 mx-auto mb-2 opacity-50 animate-pulse" />
+                    <p>Generating personalized recommendations...</p>
+                  </div>
+                ) : recommendations && recommendations.length > 0 ? (
+                  recommendations.slice(0, 3).map((rec, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 + index * 0.1 }}
+                      className="flex items-start space-x-3 p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-xl"
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <FaGlobe className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                          {rec.destination}
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                          {rec.highlights}
+                        </p>
+                        <div className="flex items-center mt-2 space-x-2">
+                          <Badge
+                            variant="secondary"
+                            size="sm"
+                            className="font-semibold"
+                          >
+                            ₹{rec.estimatedCost?.min?.toLocaleString()} - ₹
+                            {rec.estimatedCost?.max?.toLocaleString()}
+                          </Badge>
+                          <Badge variant="secondary" size="sm">
+                            {rec.duration} days
+                          </Badge>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <FaRocket className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No recommendations available yet</p>
                   </div>
                 )}
               </div>
@@ -326,9 +358,20 @@ const Dashboard = () => {
                 variant="outline"
                 size="sm"
                 className="w-full mt-4"
-                onClick={() => (window.location.href = "/trip-planner")}
+                onClick={handleRefreshRecommendations}
+                disabled={recommendationsLoading}
               >
-                Get More Recommendations
+                {recommendationsLoading ? (
+                  <>
+                    <FaRocket className="animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <FaRocket className="mr-2" />
+                    Get More Recommendations
+                  </>
+                )}
               </Button>
             </Card>
           </motion.div>
@@ -360,15 +403,15 @@ const Dashboard = () => {
               <div className="flex justify-center py-8">
                 <LoadingSpinner size="lg" />
               </div>
-            ) : recentTrips?.length > 0 ? (
+            ) : nonDraftTrips?.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recentTrips.map((trip, index) => (
+                {nonDraftTrips.map((trip, index) => (
                   <motion.div
                     key={trip._id || trip.id}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.5 + index * 0.1 }}
-                    whileHover={{ scale: 1.03, y: -5 }}
+                    whileHover={{ scale: 1.02 }}
                     className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200/50 dark:border-gray-700/50"
                     onClick={() =>
                       (window.location.href = `/trips/${trip._id || trip.id}`)

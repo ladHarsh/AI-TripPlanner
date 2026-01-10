@@ -102,7 +102,7 @@ router.get("/upcoming", protect, async (req, res) => {
     const trips = await Trip.find({
       user: req.user.id,
       startDate: { $gte: now },
-      status: { $in: ["planning", "booked"] },
+      status: { $in: ["draft", "upcoming"] },
     })
       .sort({ startDate: 1 })
       .limit(parseInt(limit));

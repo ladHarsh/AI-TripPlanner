@@ -92,25 +92,25 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-6 text-white">Resources</h4>
             <div className="space-y-3">
               {[
-                "Documentation",
-                "Help Center",
-                "Privacy Policy",
-                "Terms of Service",
+                { name: "About Project", to: "/about" },
+                { name: "How It Works", to: "/about" },
+                { name: "Contact", to: "/contact" },
+                { name: "Privacy Policy", to: "/privacy" },
               ].map((item, index) => (
                 <motion.div
-                  key={item}
+                  key={item.name}
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <a
-                    href="#"
+                  <Link
+                    to={item.to}
                     className="text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-500 mr-3 group-hover:bg-pink-500"></span>
-                    {item}
-                  </a>
+                    {item.name}
+                  </Link>
                 </motion.div>
               ))}
             </div>

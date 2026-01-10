@@ -5,6 +5,7 @@ const {
   optimizeItinerary,
   getTravelSuggestions,
   getDestinationInsights,
+  getRecommendations,
 } = require("../controllers/aiController");
 const { protect } = require("../middleware/auth");
 
@@ -51,5 +52,15 @@ router.post("/travel-suggestions", protect, getTravelSuggestions);
 // @desc    Get destination insights and information
 // @access  Private
 router.post("/destination-insights", protect, getDestinationInsights);
+
+// @route   GET /api/ai/recommendations
+// @desc    Get AI-powered trip recommendations
+// @access  Private
+router.get("/recommendations", protect, getRecommendations);
+
+// @route   POST /api/ai/recommendations/refresh
+// @desc    Refresh AI-powered trip recommendations (clears cache)
+// @access  Private
+router.post("/recommendations/refresh", protect, getRecommendations);
 
 module.exports = router;

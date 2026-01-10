@@ -302,7 +302,7 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
         },
         startDate: formValues.startDate,
         endDate: formValues.endDate,
-        status: "planning",
+        // Don't send status - let backend auto-determine based on itinerary
         notes: formValues.specialRequests || "",
         isPublic: false,
         tags: [city.toLowerCase(), country.toLowerCase(), travelStyle],

@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNotifications } from "../../contexts/NotificationContext";
-import { useTheme } from "../../contexts/ThemeContext";
 import { Button } from "../ui";
 import {
   FaBars,
@@ -14,8 +13,6 @@ import {
   FaPlane,
   FaRoute,
   FaBell,
-  FaSun,
-  FaMoon,
   FaChartBar,
 } from "react-icons/fa";
 
@@ -28,7 +25,6 @@ const Navbar = () => {
     getRemainingAiRequests,
   } = useAuth();
   const { notifications, unreadCount, markAllAsRead } = useNotifications();
-  const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -124,15 +120,6 @@ const Navbar = () => {
 
           {/* Right Side Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              icon={theme === "dark" ? FaSun : FaMoon}
-              className="!p-2"
-            />
-
             {isAuthenticated ? (
               <>
                 {/* AI Usage Indicator */}
@@ -269,6 +256,14 @@ const Navbar = () => {
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
                       >
+                        <Link
+                          to="/profile"
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <FaUser className="mr-3 h-4 w-4" />
+                          My Profile
+                        </Link>
                         <hr className="my-1 border-gray-200 dark:border-gray-700" />
                         <button
                           onClick={handleLogout}
