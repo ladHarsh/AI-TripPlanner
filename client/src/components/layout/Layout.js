@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext";
 import Navbar from "./Navbar";
@@ -12,8 +12,10 @@ const Layout = ({
   showNavbarOnly = false,
 }) => {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
 
   const shouldShowSidebar = showSidebar && isAuthenticated;
+  const shouldShowFooter = location.pathname === '/';
 
   // 1. Full Screen Layout (Auth pages)
   if (fullScreen) {
@@ -73,11 +75,12 @@ const Layout = ({
         </main>
       </div>
 
-      {/* BOTTOM: Full Width Footer */}
-      {/* z-10 ensures it sits correctly in the stacking order */}
-      <div className="w-full z-10 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-         <Footer />
-      </div>
+      {/* BOTTOM: Full Width Footer - Only show on home page */}
+      {shouldShowFooter && (
+        <div className="w-full z-10 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+           <Footer />
+        </div>
+      )}
 
     </div>
   );

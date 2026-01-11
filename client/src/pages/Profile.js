@@ -178,9 +178,7 @@ const Profile = () => {
             exit={{ opacity: 0, x: -20 }}
           >
             <Card className="relative p-3 md:p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl">
-              <div className="absolute top-4 right-4 md:hidden px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-full capitalize">
-                {user?.planType || "Free"}
-              </div>
+
               <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                 <FaUser className="mr-3 text-blue-600" />
                 Profile Information
@@ -222,10 +220,7 @@ const Profile = () => {
 
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0 pt-4">
                   <p className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
-                    Plan Type:{" "}
-                    <span className="font-semibold capitalize">
-                      {user?.planType || "Free"}
-                    </span>
+                    Trusted Traveler
                   </p>
 
                   <Button

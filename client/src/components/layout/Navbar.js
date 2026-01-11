@@ -167,7 +167,7 @@ const Navbar = () => {
                           {user?.name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                          {user?.planType} Plan
+                          Standard Plan
                         </p>
                       </div>
                     </div>

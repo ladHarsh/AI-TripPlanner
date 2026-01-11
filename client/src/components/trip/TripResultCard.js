@@ -145,11 +145,11 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
           onError={() => setImageError(true)}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent md:from-black/70 md:via-black/30 md:to-transparent" />
 
         {/* Destination Badge */}
-        <div className="absolute top-4 left-4">
-          <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
+        <div className="absolute top-4 right-4 md:left-4 md:right-auto">
+          <div className="bg-white/95 backdrop-blur-sm px-2 md:px-4 py-1 md:py-2 rounded-full shadow-lg">
             <div className="flex items-center gap-2">
               <FaMapMarkerAlt className="text-red-500" />
               <span className="font-semibold text-gray-900">
@@ -159,41 +159,41 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
           </div>
         </div>
 
-        {/* Rating Badge (if available) */}
-        <div className="absolute top-4 right-4">
-          <div className="bg-yellow-400 text-gray-900 px-3 py-2 rounded-full shadow-lg flex items-center gap-1">
+        {/* Rating Badge (if available) - Hidden on mobile */}
+        <div className="hidden md:block absolute top-4 right-4">
+          <div className="bg-yellow-400 text-gray-900 px-2 md:px-3 py-1 md:py-2 rounded-full shadow-lg flex items-center gap-1">
             <FaStar className="text-white" />
             <span className="font-bold">AI Optimized</span>
           </div>
         </div>
 
         {/* Title and subtitle overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-2">
+        <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 text-white">
+          <h2 className="text-xl md:text-4xl font-bold mb-1 md:mb-2">
             Your Perfect {itinerary.destination || formValues.destination}{" "}
             Adventure
           </h2>
-          <p className="text-lg text-gray-200">
+          <p className="hidden md:block text-sm md:text-lg text-gray-200">
             Personalized itinerary crafted by AI just for you
           </p>
         </div>
       </div>
 
       {/* Trip Details Card */}
-      <div className="p-6 md:p-8">
+      <div className="p-3 md:p-8">
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl text-center">
-            <FaCalendarAlt className="h-6 w-6 mx-auto text-blue-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-2 md:p-4 rounded-xl text-center">
+            <FaCalendarAlt className="h-5 w-5 md:h-6 md:w-6 mx-auto text-blue-600 mb-2" />
+            <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
               {itinerary.duration}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">Days</p>
           </div>
 
-          <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl text-center">
-            <FaUsers className="h-6 w-6 mx-auto text-purple-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-purple-50 dark:bg-purple-900/20 p-2 md:p-4 rounded-xl text-center">
+            <FaUsers className="h-5 w-5 md:h-6 md:w-6 mx-auto text-purple-600 mb-2" />
+            <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
               {formValues.travelers}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -201,9 +201,9 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
             </p>
           </div>
 
-          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl text-center">
-            <FaRupeeSign className="h-6 w-6 mx-auto text-green-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-green-50 dark:bg-green-900/20 p-2 md:p-4 rounded-xl text-center">
+            <FaRupeeSign className="h-5 w-5 md:h-6 md:w-6 mx-auto text-green-600 mb-2" />
+            <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
               ₹{formatCurrency(itinerary.totalEstimatedCost?.amount)}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -211,9 +211,9 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
             </p>
           </div>
 
-          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl text-center">
-            <FaStar className="h-6 w-6 mx-auto text-orange-600 mb-2" />
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-orange-50 dark:bg-orange-900/20 p-2 md:p-4 rounded-xl text-center">
+            <FaStar className="h-5 w-5 md:h-6 md:w-6 mx-auto text-orange-600 mb-2" />
+            <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
               {itinerary.itinerary?.length || 0}
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -246,7 +246,7 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
 
         {/* Best Time to Visit */}
         {itinerary.recommendations?.bestTimeToVisit && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-xl mb-6">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-2 md:p-4 rounded-xl mb-6">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               <span className="font-semibold text-gray-900 dark:text-white">
                 Best Time to Visit:
@@ -261,7 +261,7 @@ const TripResultCard = ({ itinerary, formValues, onViewDetails }) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onViewDetails}
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 group"
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 md:py-4 px-4 md:px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 md:gap-3 group text-sm md:text-base"
         >
           <FaEye />
           <span className="text-lg">View Full Trip Details</span>

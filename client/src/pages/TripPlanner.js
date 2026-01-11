@@ -178,13 +178,6 @@ const TripPlanner = () => {
   };
 
   const handleGenerateItinerary = async () => {
-    if (remainingRequests <= 0) {
-      toast.error(
-        "You've reached your AI request limit. Please upgrade your plan."
-      );
-      return;
-    }
-
     if (!isValid) {
       toast.error("Please fill in all required fields.");
       return;
@@ -335,7 +328,7 @@ const TripPlanner = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-4 md:py-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-2 md:py-6">
       <div className="max-w-4xl mx-auto px-3 py-2 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -407,22 +400,22 @@ const TripPlanner = () => {
 
             {/* Desktop View: Detailed Stepper */}
             <div className="hidden md:block">
-              <div className="flex items-center justify-between mb-4">
+              <div className="grid grid-cols-7 items-center gap-0 mb-4">
                 {stepTitles.map((title, index) => {
                   const stepNumber = index + 1;
                   const isActive = currentStep === stepNumber;
                   const isCompleted = currentStep > stepNumber;
 
                   return (
-                    <div key={stepNumber} className="flex items-center flex-1">
+                    <React.Fragment key={stepNumber}>
                       <motion.div
-                        className={`flex flex-col items-center justify-center px-4 py-3 rounded-2xl border-2 transition-all duration-300 flex-1 ${
+                        className={`flex flex-col items-center justify-center px-3 py-3 rounded-2xl border-2 transition-all duration-300 text-center col-span-1 min-h-[80px] ${
                           isActive || isCompleted
                             ? "border-transparent bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                             : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-400"
                         }`}
                       >
-                        <div className="flex items-center space-x-2 mb-1">
+                        <div className="flex items-center justify-center mb-1">
                           {isCompleted ? (
                             <FaCheckCircle className="h-5 w-5" />
                           ) : (
@@ -432,7 +425,7 @@ const TripPlanner = () => {
                           )}
                         </div>
                         <span
-                          className={`text-xs font-semibold ${
+                          className={`text-xs font-semibold leading-tight ${
                             isActive || isCompleted
                               ? "text-white"
                               : "text-gray-500 dark:text-gray-400"
@@ -443,14 +436,14 @@ const TripPlanner = () => {
                       </motion.div>
                       {index < stepTitles.length - 1 && (
                         <div
-                          className={`w-full h-1 mx-4 rounded-full transition-all duration-300 ${
+                          className={`h-1 mx-2 rounded-full transition-all duration-300 col-span-1 ${
                             isCompleted
                               ? "bg-gradient-to-r from-blue-600 to-purple-600"
                               : "bg-gray-300 dark:bg-gray-600"
                           }`}
                         />
                       )}
-                    </div>
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -464,9 +457,10 @@ const TripPlanner = () => {
         </motion.div>
 
         {/* Step Content */}
-        <Card className="p-3 md:p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl rounded-xl md:rounded-2xl">
-          {/* Step 1: Destination & Dates */}
-          {currentStep === 1 && (
+        {currentStep < 4 && (
+          <Card className="p-2 md:p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl rounded-xl md:rounded-2xl">
+            {/* Step 1: Destination & Dates */}
+            {currentStep === 1 && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -789,26 +783,15 @@ const TripPlanner = () => {
                   </div>
                 )}
 
-                {remainingRequests > 0 &&
-                  remainingRequests !== -1 &&
-                  !isGenerating && (
-                    <p className="mt-3 text-xs md:text-sm text-gray-500">
-                      This will use 1 of your {remainingRequests} remaining AI
-                      requests
-                    </p>
-                  )}
+                {!isGenerating && (
+                  <p className="mt-3 text-xs md:text-sm text-gray-500">
+                    This will use 1 AI request from your monthly balance
+                  </p>
+                )}
               </div>
             </motion.div>
           )}
 
-          {/* Step 4: Generated Itinerary */}
-          {currentStep === 4 && generatedItinerary && (
-            <TripResultCard
-              itinerary={generatedItinerary}
-              formValues={values}
-              onViewDetails={() => setShowDetailView(true)}
-            />
-          )}
 
           {/* Navigation Buttons */}
           {currentStep < 4 && (
@@ -862,7 +845,17 @@ const TripPlanner = () => {
               </motion.div>
             </div>
           )}
-        </Card>
+          </Card>
+        )}
+
+        {/* Step 4: Generated Itinerary - Outside Card wrapper */}
+        {currentStep === 4 && generatedItinerary && (
+          <TripResultCard
+            itinerary={generatedItinerary}
+            formValues={values}
+            onViewDetails={() => setShowDetailView(true)}
+          />
+        )}
       </div>
 
       {/* Full Trip Detail Modal */}

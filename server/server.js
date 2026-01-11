@@ -12,14 +12,12 @@ require("dotenv").config();
 
 // Import middleware
 const security = require("./middleware/security");
-const enhancedSecurity = require("./middleware/enhancedSecurity");
 const {
   logger,
   morganLogger,
   errorLogger,
   requestLogger,
 } = require("./middleware/logging");
-const { initializeRedis, closeRedis } = require("./middleware/cache");
 
 const app = express();
 const server = http.createServer(app);
@@ -66,8 +64,8 @@ app.set("io", io);
 app.use(morganLogger);
 app.use(requestLogger);
 
-// Enhanced security middleware
-enhancedSecurity(app);
+// Security middleware
+security(app);
 
 // Compression middleware
 app.use(compression());
@@ -302,9 +300,6 @@ const gracefulShutdown = async (signal) => {
       logger.info("Socket.IO server closed");
     });
 
-    // Close Redis connection
-    await closeRedis();
-
     // Close MongoDB connection
     await mongoose.connection.close();
     logger.info("MongoDB connection closed");
@@ -339,16 +334,6 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // Initialize Redis (optional for development)
-    try {
-      await initializeRedis();
-    } catch (redisError) {
-      // Silent fail in development
-      if (process.env.NODE_ENV === "production") {
-        logger.warn("Redis connection failed:", redisError.message);
-      }
-    }
-
     // Connect to MongoDB (optional for development)
     try {
       await connectDB();

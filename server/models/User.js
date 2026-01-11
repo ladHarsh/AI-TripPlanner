@@ -250,45 +250,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
-    // Payment and Subscription
-    stripeCustomerId: {
-      type: String,
-      sparse: true,
-      index: true,
-    },
-    subscriptionId: {
-      type: String,
-      sparse: true,
-      index: true,
-    },
-    subscriptionStatus: {
-      type: String,
-      enum: [
-        "active",
-        "inactive",
-        "past_due",
-        "cancelled",
-        "cancelling",
-        "trialing",
-      ],
-      default: "inactive",
-      index: true,
-    },
-    planType: {
-      type: String,
-      enum: ["free", "premium", "enterprise"],
-      default: "free",
-      index: true,
-    },
-    subscriptionStartDate: Date,
-    subscriptionEndDate: Date,
-    currentPeriodEnd: Date,
-    cancelAtPeriodEnd: {
-      type: Boolean,
-      default: false,
-    },
-    lastPaymentDate: Date,
-    lastPaymentFailure: Date,
+
 
     // Usage Tracking
     monthlyAiRequests: {
@@ -373,8 +335,6 @@ userSchema.virtual("fullProfile").get(function () {
     email: this.email,
     role: this.role,
     avatar: this.avatar,
-    planType: this.planType,
-    subscriptionStatus: this.subscriptionStatus,
     preferences: this.preferences,
   };
 });
@@ -603,7 +563,7 @@ userSchema.methods.canPerformAction = function (action) {
     },
   };
 
-  const userLimits = limits[this.planType] || limits.free;
+  const userLimits = limits.free;
 
   switch (action) {
     case "ai_request":

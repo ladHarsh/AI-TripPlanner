@@ -3,7 +3,6 @@ const { protect: auth } = require("../middleware/auth");
 const freeMapService = require("../services/freeMapService");
 const User = require("../models/User");
 const { logger } = require("../middleware/logging");
-const { cacheMiddleware } = require("../middleware/cache");
 
 const router = express.Router();
 
@@ -11,7 +10,7 @@ const router = express.Router();
  * @route   GET /api/maps/places/nearby
  * @desc    Get nearby places (hotels, restaurants, attractions) using OSM/Overpass
  */
-router.get("/places/nearby", cacheMiddleware(3600), async (req, res) => {
+router.get("/places/nearby", async (req, res) => {
   try {
     const { lat, lng, radius = 5000, type = "tourist_attraction", keyword } = req.query;
 
@@ -50,7 +49,7 @@ router.get("/places/nearby", cacheMiddleware(3600), async (req, res) => {
  * @route   GET /api/maps/places/search
  * @desc    Search for places using Nominatim
  */
-router.get("/places/search", cacheMiddleware(3600), async (req, res) => {
+router.get("/places/search", async (req, res) => {
   try {
     const { query, location, radius = 50000, type } = req.query;
 
@@ -88,7 +87,7 @@ router.get("/places/search", cacheMiddleware(3600), async (req, res) => {
  * @route   GET /api/maps/geocode
  * @desc    Geocode an address to coordinates using Nominatim
  */
-router.get("/geocode", cacheMiddleware(86400), async (req, res) => {
+router.get("/geocode", async (req, res) => {
   try {
     const { address } = req.query;
 
@@ -118,7 +117,7 @@ router.get("/geocode", cacheMiddleware(86400), async (req, res) => {
  * @route   GET /api/maps/reverse-geocode
  * @desc    Reverse geocode coordinates to address
  */
-router.get("/reverse-geocode", cacheMiddleware(86400), async (req, res) => {
+router.get("/reverse-geocode", async (req, res) => {
   try {
     const { lat, lng } = req.query;
 
@@ -148,7 +147,7 @@ router.get("/reverse-geocode", cacheMiddleware(86400), async (req, res) => {
  * @route   GET /api/maps/directions
  * @desc    Get directions using OSRM
  */
-router.get("/directions", cacheMiddleware(3600), async (req, res) => {
+router.get("/directions", async (req, res) => {
   try {
     const { origin, destination, mode = "driving" } = req.query;
 

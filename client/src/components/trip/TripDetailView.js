@@ -568,7 +568,7 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
       onClick={onClose}
     >
       <div
-        className="min-h-screen py-8 px-4"
+        className="min-h-screen py-4 md:py-8 px-2 md:px-4"
         onClick={(e) => e.stopPropagation()}
       >
         <motion.div
@@ -579,7 +579,7 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
         >
           {/* Header */}
           <div className="relative h-64 md:h-80 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600">
-            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-black/20 md:bg-black/30" />
             <img
               src={getHeaderImage()}
               alt={itinerary.destination}
@@ -589,46 +589,46 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-900 p-3 rounded-full shadow-lg transition-all"
+              className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-900 p-2 md:p-3 rounded-full shadow-lg transition-all"
             >
-              <FaTimes className="h-5 w-5" />
+              <FaTimes className="h-4 w-4 md:h-5 md:w-5" />
             </button>
 
             {/* Title */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+            <div className="absolute bottom-0 left-0 right-0 p-3 md:p-8 text-white">
               <div className="flex items-center gap-2 mb-2">
                 <FaMapMarkerAlt className="h-5 w-5" />
-                <span className="text-lg font-medium">Your Journey to</span>
+                <span className="text-sm md:text-lg font-medium">Your Journey to</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">
+              <h1 className="text-2xl md:text-5xl font-bold mb-1 md:mb-2">
                 {itinerary.destination}
               </h1>
-              <p className="text-lg text-gray-200">
+              <p className="text-sm md:text-lg text-gray-200">
                 {itinerary.duration} Days • {formValues.travelers} Travelers •{" "}
                 {formValues.budget} Budget
               </p>
             </div>
           </div>
 
-          <div className="p-6 md:p-8">
+          <div className="p-3 md:p-8">
             {/* Trip Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-blue-600 p-3 rounded-lg">
-                    <FaDollarSign className="h-6 w-6 text-white" />
+            <div className="grid grid-cols-3 gap-2 md:gap-6 mb-4 md:mb-8">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-2 md:p-6 rounded-xl">
+                <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3 mb-1 md:mb-2">
+                  <div className="bg-blue-600 p-1.5 md:p-3 rounded-lg">
+                    <FaDollarSign className="h-4 w-4 md:h-6 md:w-6 text-white" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-center md:text-left">
+                    <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                       Total Cost
                     </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm md:text-2xl font-bold text-gray-900 dark:text-white">
                       {itinerary.totalEstimatedCost?.currency}{" "}
                       {itinerary.totalEstimatedCost?.amount}
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="hidden md:block text-xs text-gray-500 text-center md:text-left">
                   Approximately{" "}
                   {Math.round(
                     itinerary.totalEstimatedCost?.amount / formValues.travelers
@@ -637,16 +637,16 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-purple-600 p-3 rounded-lg">
-                    <FaStar className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-2 md:p-6 rounded-xl">
+                <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3 mb-1 md:mb-2">
+                  <div className="bg-purple-600 p-1.5 md:p-3 rounded-lg">
+                    <FaStar className="h-4 w-4 md:h-6 md:w-6 text-white" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-center md:text-left">
+                    <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                       Activities
                     </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm md:text-2xl font-bold text-gray-900 dark:text-white">
                       {itinerary.itinerary?.reduce(
                         (sum, day) => sum + (day.activities?.length || 0),
                         0
@@ -654,21 +654,21 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="hidden md:block text-xs text-gray-500 text-center md:text-left">
                   Handpicked experiences for you
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-green-600 p-3 rounded-lg">
-                    <FaUtensils className="h-6 w-6 text-white" />
+              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-2 md:p-6 rounded-xl">
+                <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3 mb-1 md:mb-2">
+                  <div className="bg-green-600 p-1.5 md:p-3 rounded-lg">
+                    <FaUtensils className="h-4 w-4 md:h-6 md:w-6 text-white" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-center md:text-left">
+                    <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                       Meals Planned
                     </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm md:text-2xl font-bold text-gray-900 dark:text-white">
                       {itinerary.itinerary?.reduce(
                         (sum, day) => sum + (day.meals?.length || 0),
                         0
@@ -676,7 +676,7 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                     </p>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="hidden md:block text-xs text-gray-500 text-center md:text-left">
                   Delicious dining experiences
                 </p>
               </div>
@@ -684,7 +684,7 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
 
             {/* Recommendations */}
             {itinerary.recommendations && (
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-6 rounded-xl mb-8">
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-3 md:p-6 rounded-xl mb-4 md:mb-8">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <FaInfoCircle className="text-yellow-600" />
                   Important Travel Information
@@ -736,7 +736,7 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
 
             {/* Daily Itinerary */}
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              <h3 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-3 md:mb-6">
                 Day-by-Day Itinerary
               </h3>
               <div className="space-y-4">
@@ -751,14 +751,14 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                     {/* Day Header */}
                     <button
                       onClick={() => toggleDay(dayIndex)}
-                      className="w-full bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-6 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all"
+                      className="w-full bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 p-2 md:p-6 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg">
+                      <div className="flex items-center gap-2 md:gap-4">
+                        <div className="bg-blue-600 text-white w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-lg">
                           {day.day}
                         </div>
                         <div className="text-left">
-                          <h4 className="text-lg font-bold text-gray-900 dark:text-white">
+                          <h4 className="text-xs md:text-lg font-bold text-gray-900 dark:text-white">
                             Day {day.day}:{" "}
                             {day.title ||
                               day.theme ||
@@ -767,26 +767,27 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                               day.activities?.[0]?.name ||
                               "Activities planned"}
                           </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                             {day.date} • {day.activities?.length || 0}{" "}
                             activities
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 md:gap-4">
                         <div className="text-right">
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Daily Budget
+                          <p className="text-[10px] md:text-sm text-gray-600 dark:text-gray-400">
+                            <span className="md:hidden">Budget </span>
+                            <span className="hidden md:inline">Daily Budget</span>
                           </p>
-                          <p className="font-bold text-blue-600">
-                            {day.totalDayCost?.currency}{" "}
+                          <p className="text-xs md:text-base font-bold text-blue-600">
+                            <span className="hidden md:inline">{day.totalDayCost?.currency}{" "}</span>
                             {day.totalDayCost?.amount}
                           </p>
                         </div>
                         {expandedDays.includes(dayIndex) ? (
-                          <FaChevronUp className="text-gray-400" />
+                          <FaChevronUp className="hidden md:block text-gray-400" />
                         ) : (
-                          <FaChevronDown className="text-gray-400" />
+                          <FaChevronDown className="hidden md:block text-gray-400" />
                         )}
                       </div>
                     </button>
@@ -801,10 +802,10 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                           transition={{ duration: 0.3 }}
                           className="bg-white dark:bg-gray-800"
                         >
-                          <div className="p-6 space-y-6">
+                          <div className="p-2 md:p-6 space-y-3 md:space-y-6">
                             {/* Activities */}
                             <div>
-                              <h5 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                              <h5 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white mb-2 md:mb-4 flex items-center gap-2">
                                 <FaMapMarkerAlt className="text-blue-600" />
                                 Activities
                               </h5>
@@ -814,10 +815,10 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                                   return (
                                     <div
                                       key={actIdx}
-                                      className="flex gap-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+                                      className="flex gap-2 md:gap-4 bg-gray-50 dark:bg-gray-700 p-2 md:p-4 rounded-lg"
                                     >
                                       {/* Activity Image */}
-                                      <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
+                                      <div className="flex-shrink-0 w-16 h-16 md:w-24 md:h-24 rounded-lg overflow-hidden">
                                         <img
                                           src={getActivityImage(activity, day)}
                                           alt={activity.activity}
@@ -830,30 +831,30 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                                       </div>
 
                                       {/* Activity Details */}
-                                      <div className="flex-1">
-                                        <div className="flex items-start justify-between mb-2">
-                                          <div>
-                                            <p className="font-semibold text-gray-900 dark:text-white">
-                                              {activity.activity}
-                                            </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                              📍 {activity.location?.name}
-                                            </p>
-                                          </div>
-                                          <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm font-medium">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between mb-0.5 md:mb-2">
+                                          <p className="font-semibold text-xs md:text-base text-gray-900 dark:text-white mr-2">
+                                            {activity.activity}
+                                          </p>
+                                          <span className="flex-shrink-0 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-sm font-medium">
                                             {activity.cost?.currency}{" "}
                                             {activity.cost?.amount}
                                           </span>
                                         </div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
+                                          📍 {activity.location?.name}
+                                        </p>
+                                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-1 md:mb-2">
                                           {activity.description}
                                         </p>
-                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                        <div className="flex items-center gap-4 text-xs md:text-sm text-gray-500">
                                           <span className="flex items-center gap-1">
-                                            <FaClock /> {activity.time}
+                                            <FaClock className="w-3 h-3 md:w-4 md:h-4" /> {activity.time}
                                           </span>
+                                          
                                           <span>
-                                            Duration: {activity.duration}h
+                                            <span className="hidden md:inline">Duration: </span>
+                                            {activity.duration}h
                                           </span>
                                         </div>
                                       </div>
@@ -866,28 +867,30 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                             {/* Meals */}
                             {day.meals && day.meals.length > 0 && (
                               <div>
-                                <h5 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <h5 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white mb-2 md:mb-4 flex items-center gap-2">
                                   <FaUtensils className="text-green-600" />
-                                  Dining
+                                  <span className="md:hidden">Meals</span>
+                                  <span className="hidden md:inline">Dining</span>
                                 </h5>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
                                   {day.meals.map((meal, mealIdx) => (
-                                    <div
-                                      key={mealIdx}
-                                      className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg"
-                                    >
-                                      <p className="font-semibold text-gray-900 dark:text-white mb-1">
+                                      <div
+                                        key={mealIdx}
+                                        className="bg-green-50 dark:bg-green-900/20 p-2 md:p-4 rounded-lg"
+                                      >
+                                      <p className="font-semibold text-xs md:text-base text-gray-900 dark:text-white mb-0.5 md:mb-1">
                                         {meal.type}
                                       </p>
-                                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                      <p className="text-[10px] md:text-sm text-gray-600 dark:text-gray-400 mb-1 md:mb-2 truncate">
                                         {meal.restaurant}
                                       </p>
-                                      <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                                      <p className="text-[10px] md:text-sm text-green-600 dark:text-green-400 font-medium truncate">
                                         {meal.cost?.currency}{" "}
                                         {meal.cost?.amount}
                                       </p>
                                       {meal.cuisine && (
-                                        <p className="text-xs text-gray-500 mt-1">
+                                        <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1 truncate">
                                           {meal.cuisine}
                                         </p>
                                       )}
@@ -899,8 +902,8 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
 
                             {/* Accommodation */}
                             {day.accommodation && (
-                              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                                <h5 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                              <div className="bg-purple-50 dark:bg-purple-900/20 p-2 md:p-4 rounded-lg">
+                                <h5 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white mb-2 md:mb-4 flex items-center gap-2">
                                   <FaHotel className="text-purple-600" />
                                   Accommodation
                                 </h5>
@@ -930,17 +933,17 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
               {/* Download PDF Button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleDownloadPDF}
                 disabled={isDownloading}
-                className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold py-2 px-3 md:py-4 md:px-6 rounded-xl transition-all flex items-center justify-center gap-1 md:gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-base"
               >
                 <FaDownload className={isDownloading ? "animate-bounce" : ""} />
-                {isDownloading ? "Generating..." : "Download PDF"}
+                <span className="md:inline">{isDownloading ? "Generating..." : "Download PDF"}</span>
               </motion.button>
 
               {/* Add Trip Button */}
@@ -949,7 +952,7 @@ const TripDetailView = ({ itinerary, formValues, onClose }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAddTrip}
                 disabled={isAddingTrip}
-                className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-semibold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-semibold py-2 px-3 md:py-4 md:px-6 rounded-xl transition-all flex items-center justify-center gap-1 md:gap-3 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-base"
               >
                 <FaPlus className={isAddingTrip ? "animate-spin" : ""} />
                 {isAddingTrip ? "Adding..." : "Add Trip"}

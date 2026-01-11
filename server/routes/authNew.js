@@ -58,15 +58,12 @@ const registerValidation = [
     .isLength({ max: 254 })
     .withMessage("Please provide a valid email address"),
   body("password")
-    .isLength({ min: 6, max: 128 })
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .isLength({ min: 8, max: 128 })
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
     .withMessage(
-      "Password must be at least 6 characters with uppercase, lowercase, and number"
+      "Password must be at least 8 characters with uppercase, lowercase, number, and special character"
     ),
-  body("terms")
-    .isBoolean()
-    .custom((value) => value === true)
-    .withMessage("You must accept the terms and conditions"),
+
   body("phone")
     .optional()
     .isMobilePhone()

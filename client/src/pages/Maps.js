@@ -512,9 +512,9 @@ const Maps = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`absolute left-0 top-1/2 transform -translate-y-1/2 z-40 bg-black/40 backdrop-blur-md border-r border-y border-white/20 md:border-0 md:bg-gradient-to-r md:from-blue-600 md:to-purple-600 text-white px-2 py-6 rounded-r-2xl shadow-2xl hover:shadow-blue-500/50 font-bold transition-transform duration-300 ${
-            sidebarOpen ? "md:translate-x-96" : ""
-          }`}
+          className={`absolute ${
+            sidebarOpen ? "left-0 md:left-96" : "left-0"
+          } top-1/2 transform -translate-y-1/2 z-40 bg-black/40 backdrop-blur-md border-r border-y border-white/20 md:border-0 md:bg-gradient-to-r md:from-blue-600 md:to-purple-600 text-white px-2 py-4 md:py-6 rounded-r-2xl shadow-2xl hover:shadow-blue-500/50 font-bold transition-all duration-300`}
         >
           {sidebarOpen ? "◀" : "▶"}
         </motion.button>
@@ -531,13 +531,12 @@ const Maps = () => {
             >
               {/* Search Bar with Integrated Button */}
               <form onSubmit={handleSearch} className="relative shadow-lg md:shadow-none rounded-xl">
-                <FaSearch className="hidden md:block absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for places..."
-                  className="w-full h-11 pl-4 md:pl-10 pr-12 bg-white md:bg-gray-50 dark:bg-gray-800 md:dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white placeholder-gray-400 transition-all text-sm"
+                  className="w-full h-11 pl-4 pr-12 bg-white md:bg-gray-50 dark:bg-gray-800 md:dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white placeholder-gray-400 transition-all text-sm"
                 />
                 <button
                   type="submit"

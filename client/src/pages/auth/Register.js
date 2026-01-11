@@ -43,7 +43,7 @@ const Register = () => {
         },
         password: {
           required: true,
-          minLength: 6,
+          minLength: 8,
         },
         confirmPassword: {
           required: true,

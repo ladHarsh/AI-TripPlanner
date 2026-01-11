@@ -1,6 +1,5 @@
 const axios = require("axios");
 const { logger } = require("../middleware/logging");
-const { cache } = require("../middleware/cache");
 
 // Helper to wait (simple backoff)
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -51,10 +50,6 @@ class FreeMapService {
   // Geocode address using Nominatim with fallback
   async geocode(address) {
     try {
-      const cacheKey = `free:geocode:${address}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) return cached;
-      
       // Add delay to respect Nominatim's usage policy (max 1 request per second)
       await sleep(1500); // Increased to 1.5 seconds for safety
       
@@ -103,7 +98,6 @@ class FreeMapService {
         types: r.type ? [r.type] : [],
         address_components: r.address || {},
       };
-      await cache.set(cacheKey, result, 86400);
       return result;
     } catch (err) {
       logger.error("Free geocode error:", {
@@ -119,9 +113,6 @@ class FreeMapService {
   // Reverse geocode using Nominatim
   async reverseGeocode(lat, lng) {
     try {
-      const cacheKey = `free:reverse:${lat},${lng}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) return cached;
       const response = await axios.get(`${this.nominatimBase}/reverse`, {
         params: {
           lat,
@@ -140,7 +131,6 @@ class FreeMapService {
         types: r.type ? [r.type] : [],
         address_components: r.address || {},
       };
-      await cache.set(cacheKey, result, 86400);
       return result;
     } catch (err) {
       logger.error("Free reverse geocode error", err.message);
@@ -177,10 +167,6 @@ class FreeMapService {
   // Nearby search using Overpass (node + ways around center)
   async nearbySearch(location, radius = 5000, type = null, keyword = null) {
     try {
-      const cacheKey = `free:nearby:${location}:${radius}:${type}:${keyword}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) return cached;
-
       const [lat, lng] = location.split(",").map(parseFloat);
       const filter = type ? this.buildOverpassFilter(type) : "[amenity]";
       const keywordFilter = keyword ? `['name'~'${keyword}',i]` : "";
@@ -220,7 +206,6 @@ class FreeMapService {
         results,
         status: results.length ? "OK" : "ZERO_RESULTS",
       };
-      await cache.set(cacheKey, payload, 10800);
       return payload;
     } catch (err) {
       logger.error("Free nearby search error", err.message);
@@ -231,9 +216,6 @@ class FreeMapService {
   // Text search using Nominatim (broader than nearby)
   async searchPlaces(query, location = null, radius = 50000, type = null) {
     try {
-      const cacheKey = `free:search:${query}:${location}:${radius}:${type}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) return cached;
       const response = await axios.get(`${this.nominatimBase}/search`, {
         params: {
           q: query,
@@ -260,7 +242,6 @@ class FreeMapService {
         results,
         status: results.length ? "OK" : "ZERO_RESULTS",
       };
-      await cache.set(cacheKey, payload, 21600);
       return payload;
     } catch (err) {
       logger.error("Free search places error", err.message);
@@ -271,9 +252,6 @@ class FreeMapService {
   // Directions using OSRM
   async getDirections(origin, destination, mode = "driving") {
     try {
-      const cacheKey = `free:directions:${origin}:${destination}:${mode}`;
-      const cached = await cache.get(cacheKey);
-      if (cached) return cached;
       const [oLat, oLng] = origin.split(",").map(parseFloat);
       const [dLat, dLng] = destination.split(",").map(parseFloat);
       const profile =
@@ -334,7 +312,6 @@ class FreeMapService {
         ],
         status: "OK",
       };
-      await cache.set(cacheKey, directionsData, 3600);
       return directionsData;
     } catch (err) {
       logger.error("Free directions error", err.message);

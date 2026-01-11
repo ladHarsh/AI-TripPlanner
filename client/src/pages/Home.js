@@ -88,14 +88,14 @@ const Home = () => {
             >
               <Link
                 to="/register"
-                className="group w-full sm:w-auto bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center min-h-[44px]"
+                className="group w-full sm:w-auto bg-blue-600 text-white px-4 md:px-8 py-2.5 md:py-4 rounded-lg text-sm md:text-base font-semibold hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center min-h-[44px]"
               >
                 Get Started Free
                 <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 to="/login"
-                className="w-full sm:w-auto border border-blue-600 text-blue-600 dark:text-blue-400 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center min-h-[44px]"
+                className="w-full sm:w-auto border border-blue-600 text-blue-600 dark:text-blue-400 px-4 md:px-8 py-2.5 md:py-4 rounded-lg text-sm md:text-base font-semibold hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center min-h-[44px]"
               >
                 Sign In
               </Link>
@@ -186,7 +186,7 @@ const Home = () => {
             </p>
             <Link
               to="/register"
-              className="inline-block w-full sm:w-auto bg-white text-blue-600 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-gray-100 transition-all duration-300 shadow-xl hover:shadow-2xl min-h-[44px]"
+              className="inline-block w-full sm:w-auto bg-white text-blue-600 px-4 md:px-8 py-2.5 md:py-4 rounded-lg text-sm md:text-base font-bold hover:bg-gray-100 transition-all duration-300 shadow-xl hover:shadow-2xl min-h-[44px]"
             >
               Create Your Free Account
             </Link>

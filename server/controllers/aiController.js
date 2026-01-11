@@ -1,7 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Trip = require("../models/Trip");
 const { protect } = require("../middleware/auth");
-const { cache } = require("../middleware/cache");
 const { logger } = require("../middleware/logging");
 
 // Initialize Gemini AI
@@ -79,8 +78,7 @@ Please provide a detailed day-by-day itinerary in the following JSON format:
             "currency": "INR"
           },
           "description": "Check into hotel and freshen up",
-          "type": "accommodation",
-          "bookingRequired": true
+          "type": "accommodation"
         }
       ],
       "meals": [
@@ -633,48 +631,10 @@ Include the following information in JSON format:
 // @access  Private
 const getRecommendations = async (req, res) => {
   try {
-    const cacheKey = `recommendations_${req.user._id}`;
-    
-    // If POST request (refresh), clear cache first
-    if (req.method === "POST") {
-      await cache.del(cacheKey);
-      logger.info("Recommendations cache cleared for user:", req.user._id);
-    } else {
-      // Check cache first for GET requests (24-hour cache to avoid slow loads)
-      const cached = await cache.get(cacheKey);
-      if (cached) {
-        return res.status(200).json({
-          success: true,
-          data: cached,
-          cached: true,
-        });
-      }
-    }
+    // Use dummy recommendations instead of AI
+    const recommendations = getDummyRecommendations();
 
-    // Get user's past trips for personalization
-    const userTrips = await Trip.find({ user: req.user._id })
-      .select("destination interests travelStyle")
-      .limit(5)
-      .lean();
-
-    let recommendations;
-
-    try {
-      // Generate AI recommendations with timeout
-      const aiPromise = generateAIRecommendations(req.user, userTrips);
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("AI timeout")), 5000)
-      );
-
-      recommendations = await Promise.race([aiPromise, timeoutPromise]);
-    } catch (aiError) {
-      logger.warn("AI recommendations failed, using fallback:", aiError.message);
-      // Fallback to static recommendations
-      recommendations = getFallbackRecommendations();
-    }
-
-    // Cache for 24 hours
-    await cache.set(cacheKey, recommendations, 86400);
+    // recommendations generated
 
     res.status(200).json({
       success: true,
@@ -693,71 +653,24 @@ const getRecommendations = async (req, res) => {
   }
 };
 
-// Helper: Generate AI recommendations using Gemini
-async function generateAIRecommendations(user, userTrips) {
-  const pastDestinations = userTrips.map((t) => t.destination).join(", ");
-  const interests = userTrips.flatMap((t) => t.interests || []);
-  const uniqueInterests = [...new Set(interests)].slice(0, 5).join(", ");
-
-  const prompt = `Generate 3 personalized trip recommendations in JSON format.
-User's past trips: ${pastDestinations || "None"}
-Interests: ${uniqueInterests || "Adventure, Culture, Nature"}
-
-Return ONLY a JSON array with this exact structure:
-[
-  {
-    "destination": "City, Country",
-    "highlights": "Brief highlight (max 60 chars)",
-    "duration": 5,
-    "estimatedCost": {"min": 30000, "max": 60000, "currency": "INR"}
-  }
-]
-
-Make recommendations diverse and exciting. Keep it concise.`;
-
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 500, // Keep response short for speed
-    },
-  });
-
-  const text = result.response.text().trim();
-  const jsonMatch = text.match(/\[[\s\S]*\]/);
-  
-  if (!jsonMatch) {
-    throw new Error("Invalid AI response format");
-  }
-
-  const recommendations = JSON.parse(jsonMatch[0]);
-  
-  // Validate and ensure we have 3 recommendations
-  if (!Array.isArray(recommendations) || recommendations.length === 0) {
-    throw new Error("No recommendations generated");
-  }
-
-  return recommendations.slice(0, 3);
-}
-
-// Helper: Fallback static recommendations
-function getFallbackRecommendations() {
-  const destinations = [
+// Helper: Get random dummy recommendations from a list of 15 destinations
+function getDummyRecommendations() {
+  const allDestinations = [
     {
       destination: "Paris, France",
-      highlights: "Eiffel Tower, Louvre Museum, Seine River",
+      highlights: "Eiffel Tower, Louvre Museum, Seine River Cruise",
       duration: 5,
       estimatedCost: { min: 80000, max: 150000, currency: "INR" },
     },
     {
       destination: "Tokyo, Japan",
-      highlights: "Mount Fuji, Temples, Cherry Blossoms",
+      highlights: "Mount Fuji, Ancient Temples, Cherry Blossoms",
       duration: 6,
       estimatedCost: { min: 90000, max: 180000, currency: "INR" },
     },
     {
       destination: "Bali, Indonesia",
-      highlights: "Beaches, Temples, Rice Terraces",
+      highlights: "Pristine Beaches, Sacred Temples, Rice Terraces",
       duration: 4,
       estimatedCost: { min: 40000, max: 80000, currency: "INR" },
     },
@@ -769,7 +682,7 @@ function getFallbackRecommendations() {
     },
     {
       destination: "Goa, India",
-      highlights: "Beaches, Portuguese Heritage, Nightlife",
+      highlights: "Golden Beaches, Portuguese Heritage, Vibrant Nightlife",
       duration: 3,
       estimatedCost: { min: 15000, max: 35000, currency: "INR" },
     },
@@ -779,9 +692,64 @@ function getFallbackRecommendations() {
       duration: 5,
       estimatedCost: { min: 100000, max: 250000, currency: "INR" },
     },
+    {
+      destination: "Santorini, Greece",
+      highlights: "White-washed Buildings, Sunset Views, Aegean Sea",
+      duration: 4,
+      estimatedCost: { min: 70000, max: 140000, currency: "INR" },
+    },
+    {
+      destination: "New York, USA",
+      highlights: "Statue of Liberty, Times Square, Central Park",
+      duration: 6,
+      estimatedCost: { min: 120000, max: 220000, currency: "INR" },
+    },
+    {
+      destination: "Jaipur, India",
+      highlights: "Pink City, Amber Fort, Royal Palaces",
+      duration: 3,
+      estimatedCost: { min: 12000, max: 30000, currency: "INR" },
+    },
+    {
+      destination: "Barcelona, Spain",
+      highlights: "Sagrada Familia, Gothic Quarter, Mediterranean Beaches",
+      duration: 5,
+      estimatedCost: { min: 75000, max: 145000, currency: "INR" },
+    },
+    {
+      destination: "Singapore",
+      highlights: "Marina Bay Sands, Gardens by the Bay, Hawker Centers",
+      duration: 4,
+      estimatedCost: { min: 55000, max: 110000, currency: "INR" },
+    },
+    {
+      destination: "Kerala, India",
+      highlights: "Backwaters, Hill Stations, Ayurvedic Retreats",
+      duration: 5,
+      estimatedCost: { min: 20000, max: 45000, currency: "INR" },
+    },
+    {
+      destination: "London, England",
+      highlights: "Big Ben, British Museum, Thames River",
+      duration: 5,
+      estimatedCost: { min: 95000, max: 175000, currency: "INR" },
+    },
+    {
+      destination: "Phuket, Thailand",
+      highlights: "Tropical Beaches, Island Hopping, Thai Cuisine",
+      duration: 5,
+      estimatedCost: { min: 45000, max: 90000, currency: "INR" },
+    },
+    {
+      destination: "Manali, India",
+      highlights: "Snow-capped Mountains, Adventure Sports, Himalayan Views",
+      duration: 4,
+      estimatedCost: { min: 18000, max: 40000, currency: "INR" },
+    },
   ];
 
-  return destinations
+  // Randomly shuffle and return 3 destinations
+  return allDestinations
     .sort(() => 0.5 - Math.random())
     .slice(0, 3);
 }

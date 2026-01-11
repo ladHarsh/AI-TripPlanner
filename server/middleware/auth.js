@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const tokenManager = require("../utils/tokens");
 const { logger } = require("./logging");
-const { cache } = require("./cache");
 
 /**
  * Enhanced Authentication Middleware with Security Features
@@ -198,7 +197,6 @@ const checkPermission = (permission) => {
         "admin.users.write": ["superadmin"],
         "admin.system.manage": ["superadmin"],
         "user.profile.update": ["user", "admin", "superadmin"],
-        "ai.requests.unlimited": ["premium", "enterprise"],
         // Add more permissions as needed
       };
 
@@ -214,13 +212,7 @@ const checkPermission = (permission) => {
 
       // Check role-based permissions
       if (!requiredRoles.includes(req.user.role)) {
-        // Check plan-based permissions for certain actions
-        if (
-          permission.startsWith("ai.") &&
-          requiredRoles.includes(req.user.planType)
-        ) {
-          return next();
-        }
+
 
         return res.status(403).json({
           success: false,
@@ -328,40 +320,7 @@ const checkAccountStatus = (req, res, next) => {
  */
 const userRateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
   return async (req, res, next) => {
-    if (!req.user) {
-      return next(); // Skip if no user (let IP-based rate limiting handle it)
-    }
-
-    try {
-      const key = `user_rate_limit:${req.user._id}`;
-      const current = await cache.incr(key, Math.ceil(windowMs / 1000));
-
-      if (current > maxRequests) {
-        logger.warn("User rate limit exceeded:", {
-          userId: req.user._id,
-          requests: current,
-          limit: maxRequests,
-          ip: req.ip,
-        });
-
-        return res.status(429).json({
-          success: false,
-          message: "Too many requests. Please slow down.",
-          retryAfter: Math.ceil(windowMs / 1000),
-        });
-      }
-
-      res.set({
-        "X-RateLimit-Limit": maxRequests,
-        "X-RateLimit-Remaining": Math.max(0, maxRequests - current),
-        "X-RateLimit-Reset": new Date(Date.now() + windowMs),
-      });
-
-      next();
-    } catch (error) {
-      logger.error("User rate limit error:", error);
-      next(); // Don't block on rate limit errors
-    }
+    next(); // Rate limiting disabled (requires Redis)
   };
 };
 

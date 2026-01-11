@@ -3,9 +3,66 @@ const rateLimit = require("express-rate-limit");
 const hpp = require("hpp");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
+const { logger } = require("./logging");
 
-// Enhanced security middleware
-const securityMiddleware = (app) => {
+/**
+ * Global Security Middleware Configuration
+ * Comprehensive protection for production and development
+ */
+
+// Account lockout tracking (In-memory)
+const accountAttempts = new Map();
+const LOCKOUT_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Account lockout middleware logic
+ */
+const accountLockout = (req, res, next) => {
+  const identifier = req.ip + (req.body?.email || "");
+  const attempts = accountAttempts.get(identifier);
+
+  if (attempts && attempts.count >= LOCKOUT_ATTEMPTS) {
+    const timeLeft = attempts.lockedUntil - Date.now();
+    if (timeLeft > 0) {
+      logger.warn("Account lockout active:", {
+        identifier,
+        ip: req.ip,
+        timeLeft: Math.round(timeLeft / 1000),
+      });
+
+      return res.status(423).json({
+        success: false,
+        message: `Account locked. Try again in ${Math.ceil(timeLeft / 60000)} minutes.`,
+        code: "ACCOUNT_LOCKED",
+        retryAfter: Math.ceil(timeLeft / 1000),
+      });
+    } else {
+      accountAttempts.delete(identifier);
+    }
+  }
+
+  req.trackFailedLogin = () => {
+    const current = accountAttempts.get(identifier) || { count: 0 };
+    current.count += 1;
+    if (current.count >= LOCKOUT_ATTEMPTS) {
+      current.lockedUntil = Date.now() + LOCKOUT_DURATION;
+      logger.warn("Account locked due to failed attempts:", { identifier, ip: req.ip });
+    }
+    accountAttempts.set(identifier, current);
+  };
+
+  req.resetLoginAttempts = () => {
+    accountAttempts.delete(identifier);
+  };
+
+  next();
+};
+
+const setupSecurity = (app) => {
+  // Trust proxy for rate limiting behind load balancers
+  app.set("trust proxy", 1);
+
   // Helmet for security headers
   app.use(
     helmet({
@@ -13,107 +70,51 @@ const securityMiddleware = (app) => {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:"],
-          scriptSrc: [
-            "'self'",
-            "https://js.stripe.com",
-            "https://maps.googleapis.com",
-          ],
-          imgSrc: ["'self'", "data:", "https:", "blob:"],
-          connectSrc: [
-            "'self'",
-            "https://api.stripe.com",
-            "https://maps.googleapis.com",
-          ],
-          fontSrc: ["'self'", "https:", "data:"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:", "fonts.googleapis.com"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          imgSrc: ["'self'", "data:", "https:", "blob:", "*.openstreetmap.org", "*.tile.openstreetmap.org"],
+          connectSrc: ["'self'", "https://*.openstreetmap.org", "https://overpass-api.de", "https://router.project-osrm.org", "ws://localhost:*", "http://localhost:*"],
+          fontSrc: ["'self'", "https:", "data:", "fonts.gstatic.com"],
           objectSrc: ["'none'"],
-          mediaSrc: ["'self'"],
-          frameSrc: ["https://js.stripe.com", "https://hooks.stripe.com"],
+          mediaSrc: ["'self'", "data:", "https:"],
+          frameSrc: ["'self'"],
         },
       },
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     })
   );
 
-  // Data sanitization against NoSQL query injection
+  // Data sanitization
   app.use(mongoSanitize());
-
-  // Data sanitization against XSS attacks
   app.use(xss());
+  app.use(hpp({ whitelist: ["sort", "page", "limit"] }));
 
-  // Prevent HTTP Parameter Pollution attacks
-  app.use(hpp());
-
-  // Rate limiting configurations
-  const createRateLimit = (windowMs, max, message) =>
+  // Helper for creating rate limits
+  const createLimit = (windowMs, max, message) =>
     rateLimit({
       windowMs,
       max,
-      message: {
-        success: false,
-        message:
-          message || "Too many requests from this IP, please try again later.",
-      },
+      message: { success: false, message, code: "RATE_LIMIT_EXCEEDED" },
       standardHeaders: true,
       legacyHeaders: false,
-      handler: (req, res) => {
-        res.status(429).json({
-          success: false,
-          message: "Rate limit exceeded",
-          retryAfter: Math.round(windowMs / 1000),
-        });
-      },
     });
 
-  // General rate limiting
-  app.use(
-    "/api/",
-    createRateLimit(
-      15 * 60 * 1000, // 15 minutes
-      100, // 100 requests per window
-      "Too many API requests from this IP"
-    )
-  );
+  // Apply rate limits
+  app.use("/api/", createLimit(15 * 60 * 1000, 500, "Too many requests."));
+  app.use("/api/auth/login", createLimit(15 * 60 * 1000, 10, "Too many login attempts."));
+  app.use("/api/auth/register", createLimit(60 * 60 * 1000, 5, "Too many registration attempts."));
+  app.use("/api/ai/", createLimit(60 * 60 * 1000, 50, "AI limit reached for this hour."));
 
-  // Stricter rate limiting for authentication routes
-  app.use(
-    "/api/auth/",
-    createRateLimit(
-      15 * 60 * 1000, // 15 minutes
-      5, // 5 requests per window
-      "Too many authentication attempts"
-    )
-  );
+  // Account lockout for login
+  app.use("/api/auth/login", accountLockout);
 
-  // AI route rate limiting
-  app.use(
-    "/api/ai/",
-    createRateLimit(
-      60 * 60 * 1000, // 1 hour
-      20, // 20 AI requests per hour
-      "Too many AI requests from this IP"
-    )
-  );
+  // Remove fingerprinting
+  app.use((req, res, next) => {
+    res.removeHeader("X-Powered-By");
+    next();
+  });
 
-  // Payment route rate limiting
-  app.use(
-    "/api/payments/",
-    createRateLimit(
-      15 * 60 * 1000, // 15 minutes
-      10, // 10 payment requests per window
-      "Too many payment requests"
-    )
-  );
-
-  // HTTPS enforcement for production
-  if (process.env.NODE_ENV === "production") {
-    app.use((req, res, next) => {
-      if (req.header("x-forwarded-proto") !== "https") {
-        res.redirect(`https://${req.header("host")}${req.url}`);
-      } else {
-        next();
-      }
-    });
-  }
+  logger.info("Security system initialized");
 };
 
-module.exports = securityMiddleware;
+module.exports = setupSecurity;

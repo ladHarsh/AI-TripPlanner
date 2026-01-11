@@ -23,14 +23,14 @@ const Footer = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-12 mb-8 lg:mb-12"
+          className="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-12 mb-4 lg:mb-12"
         >
           {/* Brand Section */}
           <div className="col-span-2 md:col-span-1">
             <h3 className="text-2xl lg:text-3xl font-bold mb-3 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               AI Trip Planner
             </h3>
-            <p className="text-sm lg:text-base text-gray-400 mb-4 leading-relaxed">
+            <p className="text-sm lg:text-base text-gray-400 mb-2 lg:mb-4 leading-relaxed">
               Your intelligent travel companion powered by cutting-edge AI. Plan
               smarter, explore better.
             </p>
@@ -77,7 +77,7 @@ const Footer = () => {
                 >
                   <Link
                     to={link.to}
-                    className="text-sm lg:text-base text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group py-2"
+                    className="text-sm lg:text-base text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group py-1 md:py-2"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-3 group-hover:bg-purple-500"></span>
                     {link.name}
@@ -108,7 +108,7 @@ const Footer = () => {
                 >
                   <Link
                     to={item.to}
-                    className="text-sm lg:text-base text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group py-2"
+                    className="text-sm lg:text-base text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group py-1 md:py-2"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-500 mr-3 group-hover:bg-pink-500"></span>
                     {item.name}

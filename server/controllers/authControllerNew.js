@@ -1,7 +1,6 @@
 const { validationResult } = require("express-validator");
 const User = require("../models/User");
 const tokenManager = require("../utils/tokens");
-const emailService = require("../services/email");
 const { logger } = require("../middleware/logging");
 
 /**
@@ -57,9 +56,9 @@ const register = async (req, res) => {
       phone: phone?.trim(),
       dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
       newsletter,
-      termsAccepted: terms,
-      privacyPolicyAccepted: terms,
-      dataProcessingConsent: terms,
+      termsAccepted: true,
+      privacyPolicyAccepted: true,
+      dataProcessingConsent: true,
       createdFrom: "web",
     });
 
@@ -507,22 +506,7 @@ const updateProfile = async (req, res) => {
       }
 
       updates.email = req.body.email.toLowerCase();
-      updates.isEmailVerified = false;
-
-      // Send verification email for new address
-      const verificationToken = user.createEmailVerificationToken();
-      try {
-        await emailService.sendEmailVerification(
-          updates.email,
-          verificationToken,
-          user.name
-        );
-      } catch (emailError) {
-        logger.error(
-          "Failed to send verification email for email change:",
-          emailError
-        );
-      }
+      updates.email = req.body.email.toLowerCase();
     }
 
     Object.assign(user, updates);

@@ -27,7 +27,7 @@ const Login = () => {
         },
         password: {
           required: true,
-          minLength: 6,
+          minLength: 8,
         },
       }
     );

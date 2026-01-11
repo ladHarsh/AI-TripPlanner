@@ -218,34 +218,14 @@ export const AuthProvider = ({ children }) => {
 
     // Admin has all permissions
     if (state.user.role === "admin") return true;
-
-    // Check specific permissions
-    switch (permission) {
-      case "admin":
-        return state.user.role === "admin";
-      case "premium":
-        return ["premium", "pro", "admin"].includes(state.user.planType);
-      case "pro":
-        return ["pro", "admin"].includes(state.user.planType);
-      default:
-        return true; // Basic user permissions
-    }
+    return permission !== "admin";
   };
 
   const getRemainingAiRequests = () => {
     if (!state.user) return 0;
 
-    // Return remaining AI requests based on plan
-    switch (state.user.planType) {
-      case "free":
-        return state.user.aiRequestsRemaining || 0;
-      case "premium":
-        return state.user.aiRequestsRemaining || 50;
-      case "enterprise":
-        return -1; // Unlimited
-      default:
-        return 0;
-    }
+    // Return unlimited requests (-1) for all users
+    return -1;
   };
 
   const refreshUserData = async () => {

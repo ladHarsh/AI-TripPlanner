@@ -122,7 +122,7 @@ const getTrips = async (req, res) => {
     console.log("Query:", JSON.stringify(query));
     console.log("Sort:", sort);
 
-    // Get trips with pagination - removed bookings population for now
+    // Get trips with pagination
     const trips = await Trip.find(query)
       .populate("user", "name email avatar")
       .sort(sort)
@@ -415,7 +415,6 @@ const getPublicTrips = async (req, res) => {
     // Get public trips
     const trips = await Trip.find(query)
       .populate("user", "name avatar")
-      .select("-bookings") // Don't include booking details for public trips
       .sort(sort)
       .skip(skip)
       .limit(parseInt(limit));

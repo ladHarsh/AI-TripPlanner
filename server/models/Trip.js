@@ -125,10 +125,6 @@ const tripSchema = new mongoose.Schema(
                   "activity",
                 ],
               },
-              bookingRequired: {
-                type: Boolean,
-                default: false,
-              },
             },
           ],
           totalCost: {
@@ -144,17 +140,7 @@ const tripSchema = new mongoose.Schema(
       summary: String,
     },
 
-    // Bookings associated with this trip
-    bookings: [
-      {
-        booking: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Booking",
-        },
-        day: Number,
-        activityIndex: Number,
-      },
-    ],
+
 
     // Trip status
     status: {
@@ -231,15 +217,7 @@ tripSchema.methods.calculateTotalCost = function () {
   return this.save();
 };
 
-// Method to add booking to trip
-tripSchema.methods.addBooking = function (bookingId, day, activityIndex) {
-  this.bookings.push({
-    booking: bookingId,
-    day,
-    activityIndex,
-  });
-  return this.save();
-};
+
 
 // Method to update trip status
 tripSchema.methods.updateStatus = function (newStatus) {
