@@ -9,7 +9,7 @@ const initialState = {
   user: null,
   token: localStorage.getItem("token"),
   isAuthenticated: false,
-  loading: !!localStorage.getItem("token"), // Only show loading if there's a token to verify
+  loading: false, // Start false, only true when actually verifying
 };
 
 const authReducer = (state, action) => {
@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       const storedToken = localStorage.getItem("token");
       if (storedToken) {
+        dispatch({ type: "AUTH_START" }); // Explicitly start loading
         try {
           // Add timeout to prevent hanging
           const controller = new AbortController();
