@@ -14,11 +14,16 @@ const protect = async (req, res, next) => {
     let token = null;
 
     // Get token from Authorization header
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer ")
-    ) {
-      token = tokenManager.extractTokenFromHeader(req.headers.authorization);
+    try {
+      if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer ")
+      ) {
+        token = tokenManager.extractTokenFromHeader(req.headers.authorization);
+      }
+    } catch (err) {
+      logger.error("Token extraction error:", err);
+      // Consume error and treat as no token
     }
 
     if (!token) {
