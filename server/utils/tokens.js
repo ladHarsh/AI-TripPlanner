@@ -195,13 +195,10 @@ class TokenManager {
     return {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge,
       path: "/",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? process.env.COOKIE_DOMAIN
-          : undefined,
+      domain: undefined, // Let the browser handle the domain automatically for cross-site
     };
   }
 
