@@ -73,7 +73,7 @@ const setupSecurity = (app) => {
           styleSrc: ["'self'", "'unsafe-inline'", "https:", "data:", "fonts.googleapis.com"],
           scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
           imgSrc: ["'self'", "data:", "https:", "blob:", "*.openstreetmap.org", "*.tile.openstreetmap.org"],
-          connectSrc: ["'self'", "https://*.openstreetmap.org", "https://overpass-api.de", "https://router.project-osrm.org", "ws://localhost:*", "http://localhost:*"],
+          connectSrc: ["'self'", "https://*.openstreetmap.org", "https://overpass-api.de", "https://router.project-osrm.org", "ws://localhost:*", "http://localhost:*", "https://trips-planner.onrender.com", "wss://trips-planner.onrender.com"],
           fontSrc: ["'self'", "https:", "data:", "fonts.gstatic.com"],
           objectSrc: ["'none'"],
           mediaSrc: ["'self'", "data:", "https:"],
