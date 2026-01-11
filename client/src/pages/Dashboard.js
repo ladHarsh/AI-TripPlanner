@@ -127,21 +127,21 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 lg:px-8 md:py-6">
         {/* Welcome Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-4 md:mb-6"
         >
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-6 shadow-xl text-white">
+          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-xl text-white">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
                 <motion.h1
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-3xl font-bold"
+                  className="text-2xl md:text-3xl font-bold"
                 >
                   Welcome back, {user?.name}! 👋
                 </motion.h1>
@@ -149,7 +149,7 @@ const Dashboard = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="mt-2 text-blue-100"
+                  className="mt-1 md:mt-2 text-sm md:text-base text-blue-100"
                 >
                   Ready to plan your next adventure? Let's make it amazing.
                 </motion.p>
@@ -159,11 +159,11 @@ const Dashboard = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
-                className="mt-4 md:mt-0 flex items-center space-x-3"
+                className="mt-3 md:mt-0 flex items-center space-x-3"
               >
                 <Badge
                   variant={user?.planType === "free" ? "warning" : "success"}
-                  className="capitalize text-sm px-3 py-1"
+                  className="capitalize text-xs md:text-sm px-2 md:px-3 py-1"
                 >
                   {user?.planType} Plan
                 </Badge>
@@ -173,7 +173,7 @@ const Dashboard = () => {
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="bg-white text-blue-600 hover:bg-blue-50"
+                      className="bg-white text-blue-600 hover:bg-blue-50 min-h-[36px]"
                     >
                       <FaRocket className="mr-2" />
                       Upgrade
@@ -190,7 +190,7 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 mb-4 md:mb-6"
         >
           {statsCards.map((stat, index) => (
             <motion.div
@@ -199,14 +199,14 @@ const Dashboard = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 + index * 0.1 }}
             >
-              <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300">
+              <Card className="p-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg transition-all duration-300 h-full">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  <div className="min-w-0">
+                    <p className="text-[10px] md:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 md:mb-2 truncate">
                       {stat.title}
                     </p>
-                    <div className="flex items-baseline">
-                      <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <div className="flex items-baseline flex-wrap">
+                      <div className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white">
                         {tripsLoading ? (
                           <LoadingSpinner size="sm" />
                         ) : (
@@ -214,16 +214,16 @@ const Dashboard = () => {
                         )}
                       </div>
                       <span
-                        className={`ml-2 text-xs font-semibold px-2 py-1 rounded-full ${stat.bgColor} ${stat.color}`}
+                        className={`ml-1 md:ml-2 text-[10px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 md:py-1 rounded-full ${stat.bgColor} ${stat.color}`}
                       >
                         {stat.trend}
                       </span>
                     </div>
                   </div>
                   <div
-                    className={`p-4 rounded-xl ${stat.bgColor}`}
+                    className={`p-2 md:p-4 rounded-lg md:rounded-xl ${stat.bgColor} hidden xs:block`}
                   >
-                    <stat.icon className={`h-7 w-7 ${stat.color}`} />
+                    <stat.icon className={`h-4 w-4 md:h-7 md:w-7 ${stat.color}`} />
                   </div>
                 </div>
               </Card>
@@ -231,7 +231,7 @@ const Dashboard = () => {
           ))}
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Quick Actions */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -239,15 +239,15 @@ const Dashboard = () => {
             transition={{ delay: 0.2 }}
             className="lg:col-span-2"
           >
-            <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-              <div className="flex items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                  <FaRocket className="mr-3 text-blue-600" />
+            <Card className="p-4 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg h-full">
+              <div className="flex items-center mb-4 md:mb-6">
+                <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                  <FaRocket className="mr-2 md:mr-3 text-blue-600" />
                   Quick Actions
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {quickActions.map((action, index) => (
                   <motion.div
                     key={action.title}
@@ -259,19 +259,19 @@ const Dashboard = () => {
                   >
                     <Link
                       to={action.href}
-                      className={`block p-6 rounded-2xl text-white transition-all duration-300 transform shadow-lg hover:shadow-2xl ${action.color} ${action.hoverColor}`}
+                      className={`block p-4 md:p-6 rounded-xl md:rounded-2xl text-white transition-all duration-300 transform shadow-lg hover:shadow-2xl ${action.color} ${action.hoverColor}`}
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                          <action.icon className="h-7 w-7" />
+                      <div className="flex items-center space-x-3 md:space-x-4">
+                        <div className="p-2 md:p-3 bg-white/20 backdrop-blur-sm rounded-lg md:rounded-xl">
+                          <action.icon className="h-5 w-5 md:h-7 md:w-7" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-lg">{action.title}</h3>
-                          <p className="text-sm text-white/90 mt-1">
+                          <h3 className="font-bold text-base md:text-lg">{action.title}</h3>
+                          <p className="text-xs md:text-sm text-white/90 mt-0.5 md:mt-1">
                             {action.description}
                           </p>
                         </div>
-                        <FaArrowRight className="h-5 w-5" />
+                        <FaArrowRight className="h-4 w-4 md:h-5 md:w-5" />
                       </div>
                     </Link>
                   </motion.div>
@@ -286,30 +286,30 @@ const Dashboard = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-                  AI Recommended Trips
+            <Card className="p-4 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg h-full">
+              <div className="flex items-center justify-between mb-4 md:mb-6">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                  AI Recommended
                 </h2>
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                  <FaRocket className="h-5 w-5 text-white" />
+                <div className="p-1.5 md:p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                  <FaRocket className="h-4 w-4 md:h-5 md:w-5 text-white" />
                 </div>
               </div>
 
               <div className="space-y-3">
                 {recommendationsError ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <FaRocket className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">
+                  <div className="text-center py-6 md:py-8 text-gray-500 dark:text-gray-400">
+                    <FaRocket className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-xs md:text-sm">
                       {recommendationsError.message?.includes("401") || recommendationsError.message?.includes("Unauthorized")
-                        ? "Please log in to see personalized recommendations"
+                        ? "Log in to see recommendations"
                         : "Unable to load recommendations"}
                     </p>
                   </div>
                 ) : recommendationsLoading ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <FaRocket className="h-8 w-8 mx-auto mb-2 opacity-50 animate-pulse" />
-                    <p>Generating personalized recommendations...</p>
+                  <div className="text-center py-6 md:py-8 text-gray-500 dark:text-gray-400">
+                    <FaRocket className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 opacity-50 animate-pulse" />
+                    <p className="text-xs md:text-sm">Generating recommendations...</p>
                   </div>
                 ) : recommendations && recommendations.length > 0 ? (
                   recommendations.slice(0, 3).map((rec, index) => (
@@ -318,28 +318,27 @@ const Dashboard = () => {
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4 + index * 0.1 }}
-                      className="flex items-start space-x-3 p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-xl"
+                      className="flex items-start space-x-3 p-3 md:p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-xl"
                     >
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <FaGlobe className="h-6 w-6 text-white" />
+                      <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg">
+                        <FaGlobe className="h-5 w-5 md:h-6 md:w-6 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">
                           {rec.destination}
                         </h4>
-                        <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                        <p className="text-[10px] md:text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed line-clamp-2">
                           {rec.highlights}
                         </p>
-                        <div className="flex items-center mt-2 space-x-2">
+                        <div className="flex items-center mt-2 space-x-2 flex-wrap gap-y-1">
                           <Badge
                             variant="secondary"
                             size="sm"
-                            className="font-semibold"
+                            className="text-[10px] md:text-sm font-semibold"
                           >
-                            ₹{rec.estimatedCost?.min?.toLocaleString()} - ₹
-                            {rec.estimatedCost?.max?.toLocaleString()}
+                            ₹{rec.estimatedCost?.min?.toLocaleString()}
                           </Badge>
-                          <Badge variant="secondary" size="sm">
+                          <Badge variant="secondary" size="sm" className="text-[10px] md:text-sm">
                             {rec.duration} days
                           </Badge>
                         </div>
@@ -347,9 +346,9 @@ const Dashboard = () => {
                     </motion.div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <FaRocket className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No recommendations available yet</p>
+                  <div className="text-center py-6 md:py-8 text-gray-500 dark:text-gray-400">
+                    <FaRocket className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-xs md:text-sm">No recommendations yet</p>
                   </div>
                 )}
               </div>
@@ -357,7 +356,7 @@ const Dashboard = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full mt-4"
+                className="w-full mt-4 min-h-[44px]"
                 onClick={handleRefreshRecommendations}
                 disabled={recommendationsLoading}
               >
@@ -369,7 +368,7 @@ const Dashboard = () => {
                 ) : (
                   <>
                     <FaRocket className="mr-2" />
-                    Get More Recommendations
+                    Refresh
                   </>
                 )}
               </Button>
@@ -382,20 +381,20 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-6"
+          className="mt-4 md:mt-6"
         >
-          <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                <FaRoute className="mr-3 text-purple-600" />
+          <Card className="p-4 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <FaRoute className="mr-2 md:mr-3 text-purple-600" />
                 My Trips
               </h2>
               <Link
                 to="/trips"
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 text-sm font-semibold flex items-center transition-colors"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 text-xs md:text-sm font-semibold flex items-center transition-colors px-2 py-1"
               >
-                View All Trips
-                <FaArrowRight className="ml-2 h-3 w-3" />
+                View All
+                <FaArrowRight className="ml-1 md:ml-2 h-3 w-3" />
               </Link>
             </div>
 
@@ -404,41 +403,23 @@ const Dashboard = () => {
                 <LoadingSpinner size="lg" />
               </div>
             ) : nonDraftTrips?.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {nonDraftTrips.map((trip, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                {nonDraftTrips.slice(0, 3).map((trip, index) => (
                   <motion.div
                     key={trip._id || trip.id}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.5 + index * 0.1 }}
                     whileHover={{ scale: 1.02 }}
-                    className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200/50 dark:border-gray-700/50"
+                    className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-xl md:rounded-2xl p-4 md:p-5 hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200/50 dark:border-gray-700/50"
                     onClick={() =>
                       (window.location.href = `/trips/${trip._id || trip.id}`)
                     }
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 dark:text-white capitalize">
-                          {trip.destination?.city || trip.title || "Unknown"}
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(trip.startDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          )}{" "}
-                          -{" "}
-                          {new Date(trip.endDate).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </div>
+                    <div className="flex items-start justify-between mb-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white capitalize text-base md:text-lg pr-2">
+                        {trip.destination?.city || trip.title || "Unknown"}
+                      </h3>
                       <Badge
                         variant={
                           new Date(trip.endDate) < new Date()
@@ -446,6 +427,7 @@ const Dashboard = () => {
                             : "warning"
                         }
                         size="sm"
+                        className="text-xs shrink-0"
                       >
                         {new Date(trip.endDate) < new Date()
                           ? "Completed"
@@ -453,30 +435,23 @@ const Dashboard = () => {
                       </Badge>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
-                      <div className="flex items-center">
-                        <FaCalendarAlt className="h-4 w-4 mr-2" />
-                        <span>
-                          {trip.preferences?.duration ||
-                            trip.duration ||
-                            trip.itinerary?.days?.length ||
-                            "N/A"}{" "}
-                          days
-                        </span>
-                      </div>
-                      {trip.preferences?.travelStyle && (
-                        <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full capitalize">
-                          {trip.preferences.travelStyle}
-                        </span>
-                      )}
-                    </div>
+                    <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-3 block w-full">
+                      {new Date(trip.startDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}{" "}
+                      -{" "}
+                      {new Date(trip.endDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                          Budget
-                        </p>
-                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    <div className="flex items-center justify-between text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-0 md:mb-1">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-900 dark:text-white mr-1">
                           ₹
                           {(
                             trip.preferences?.budget?.max ||
@@ -485,18 +460,18 @@ const Dashboard = () => {
                             0
                           ).toLocaleString("en-IN")}
                         </span>
+                        <span className="text-xs text-gray-400 hidden md:inline">Budget</span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                          Activities
-                        </p>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-900 dark:text-white mr-1">
                           {trip.itinerary?.days?.reduce(
                             (total, day) =>
                               total + (day.activities?.length || 0),
                             0
-                          ) || 0}{" "}
-                          planned
+                          ) || 0}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          Activities
                         </span>
                       </div>
                     </div>
@@ -504,19 +479,19 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl">
+              <div className="text-center py-10 md:py-16 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-4">
                 <div className="relative inline-block">
                   <div className="absolute inset-0 bg-blue-400 rounded-full blur-2xl opacity-20 animate-pulse"></div>
-                  <FaPlane className="relative h-20 w-20 mx-auto text-blue-500 dark:text-blue-400 mb-4" />
+                  <FaPlane className="relative h-12 w-12 md:h-20 md:w-20 mx-auto text-blue-500 dark:text-blue-400 mb-4" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2">
                   No trips yet
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
+                <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 mb-6 max-w-md mx-auto">
                   Start planning your first adventure with AI assistance
                 </p>
                 <Link to="/trip-planner">
-                  <Button variant="primary" className="px-6 py-3">
+                  <Button variant="primary" className="px-4 py-2 md:px-6 md:py-3 w-full md:w-auto min-h-[44px]">
                     <FaPlus className="mr-2" />
                     Plan Your First Trip
                   </Button>

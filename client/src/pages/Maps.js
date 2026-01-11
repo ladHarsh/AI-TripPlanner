@@ -233,19 +233,19 @@ const Maps = () => {
       style={{ height: "calc(100vh - 64px)" }}
     >
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 relative overflow-hidden">
         {/* Enhanced Sidebar */}
         <AnimatePresence>
           {sidebarOpen && (
             <motion.div
-              initial={{ x: -300, opacity: 0 }}
+              initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
+              exit={{ x: "-100%", opacity: 0 }}
               transition={{ type: "spring", damping: 20 }}
-              className="w-96 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-r border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-y-auto"
+              className="absolute top-0 left-0 h-full z-30 w-full md:w-96 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-r border-gray-200/50 dark:border-gray-700/50 shadow-2xl overflow-y-auto"
             >
               {/* Enhanced Tabs */}
-              <div className="flex gap-2 p-4 bg-gradient-to-r from-blue-50/80 via-purple-50/80 to-pink-50/80 dark:from-gray-800 dark:to-gray-800 border-b border-gray-200/50 dark:border-gray-700/50">
+              <div className="flex gap-2 p-2 md:p-4 bg-gradient-to-r from-blue-50/80 via-purple-50/80 to-pink-50/80 dark:from-gray-800 dark:to-gray-800 border-b border-gray-200/50 dark:border-gray-700/50">
                 {[
                   { id: "nearby", label: "Nearby", icon: FaMapPin },
                   { id: "saved", label: "Saved", icon: FaHeart },
@@ -255,7 +255,7 @@ const Maps = () => {
                     onClick={() => setActiveTab(tab.id)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold rounded-2xl transition-all ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 md:px-6 md:py-3 text-sm font-bold rounded-2xl transition-all ${
                       activeTab === tab.id
                         ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30"
                         : "text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700/70 shadow-sm"
@@ -269,7 +269,7 @@ const Maps = () => {
 
               {/* Enhanced Nearby Places Tab */}
               {activeTab === "nearby" && (
-                <div className="p-6 space-y-6">
+                <div className="p-3 space-y-3 md:p-6 md:space-y-6">
                   <div>
                     <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
                       <FaMapPin className="h-4 w-4 text-blue-600" />
@@ -278,7 +278,7 @@ const Maps = () => {
                     <select
                       value={placeType}
                       onChange={(e) => setPlaceType(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white font-semibold transition-all cursor-pointer"
+                      className="w-full px-3 py-2 md:px-4 md:py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white font-semibold transition-all cursor-pointer"
                     >
                       <option value="tourist_attraction">
                         Tourist Attractions
@@ -296,8 +296,8 @@ const Maps = () => {
 
                   {/* Enhanced Radius and Sorting Controls */}
                   <div className="grid grid-cols-1 gap-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-700 p-4 rounded-2xl">
-                      <label className="flex items-center justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">
+                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-700 p-3 md:p-4 rounded-2xl">
+                      <label className="flex items-center justify-between text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 md:mb-3">
                         <span>Search Radius</span>
                         <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-xs font-bold">
                           {radiusKm} km
@@ -326,7 +326,7 @@ const Maps = () => {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white font-semibold transition-all cursor-pointer"
+                        className="w-full px-3 py-2 md:px-4 md:py-3 border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white font-semibold transition-all cursor-pointer"
                       >
                         <option value="distance">Distance</option>
                         <option value="name">Name</option>
@@ -356,7 +356,7 @@ const Maps = () => {
                     </div>
                   )}
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {places.map((place, index) => (
                       <motion.div
                         key={place.place_id || index}
@@ -368,7 +368,7 @@ const Maps = () => {
                           y: -4,
                           boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
                         }}
-                        className="bg-white dark:bg-gray-700 rounded-2xl p-5 hover:shadow-2xl cursor-pointer transition-all border-2 border-gray-100 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 group"
+                        className="bg-white dark:bg-gray-700 rounded-2xl p-3 md:p-5 border-2 border-gray-100 dark:border-gray-600 shadow-md hover:shadow-2xl transition-all group"
                         onClick={() => {
                           setSelectedPlace(place);
                           setCenter({
@@ -429,13 +429,13 @@ const Maps = () => {
 
               {/* Enhanced Saved Locations Tab */}
               {activeTab === "saved" && (
-                <div className="p-6">
+                <div className="p-3 md:p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-3 bg-gradient-to-br from-pink-600 to-purple-600 rounded-xl shadow-lg">
                       <FaHeart className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-xl md:text-2xl">
                         Saved Locations
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -444,8 +444,8 @@ const Maps = () => {
                     </div>
                   </div>
                   {savedLocations.length === 0 ? (
-                    <div className="text-center py-12 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600">
-                      <FaHeart className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <div className="text-center py-6 md:py-12 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600">
+                      <FaHeart className="h-12 w-12 md:h-16 md:w-16 mx-auto mb-3 md:mb-4 text-gray-300 dark:text-gray-600" />
                       <p className="text-gray-500 dark:text-gray-400 font-semibold">
                         No saved locations yet
                       </p>
@@ -454,14 +454,14 @@ const Maps = () => {
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3 md:space-y-4">
                       {savedLocations.map((location) => (
                         <motion.div
                           key={location._id}
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           whileHover={{ scale: 1.02 }}
-                          className="bg-white dark:bg-gray-700 rounded-2xl p-5 border-2 border-gray-100 dark:border-gray-600 shadow-md hover:shadow-2xl transition-all group"
+                          className="bg-white dark:bg-gray-700 rounded-2xl p-3 md:p-5 border-2 border-gray-100 dark:border-gray-600 shadow-md hover:shadow-2xl transition-all group"
                         >
                           <div className="flex justify-between items-start gap-3">
                             <div
@@ -473,11 +473,11 @@ const Maps = () => {
                                 })
                               }
                             >
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="w-10 h-10 bg-gradient-to-br from-pink-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                  <FaHeart className="h-5 w-5 text-white" />
+                              <div className="flex items-center gap-3 mb-0 md:mb-2">
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-pink-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                  <FaHeart className="h-3.5 w-3.5 md:h-5 md:w-5 text-white" />
                                 </div>
-                                <h4 className="font-bold text-gray-900 dark:text-white text-base flex-1 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                <h4 className="font-bold text-gray-900 dark:text-white text-sm md:text-base flex-1 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                                   {location.name}
                                 </h4>
                               </div>
@@ -512,50 +512,48 @@ const Maps = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-6 rounded-r-2xl shadow-2xl hover:shadow-blue-500/50 font-bold transition-all"
-          style={{ marginLeft: sidebarOpen ? "384px" : "0" }}
+          className={`absolute left-0 top-1/2 transform -translate-y-1/2 z-40 bg-black/40 backdrop-blur-md border-r border-y border-white/20 md:border-0 md:bg-gradient-to-r md:from-blue-600 md:to-purple-600 text-white px-2 py-6 rounded-r-2xl shadow-2xl hover:shadow-blue-500/50 font-bold transition-transform duration-300 ${
+            sidebarOpen ? "md:translate-x-96" : ""
+          }`}
         >
           {sidebarOpen ? "◀" : "▶"}
         </motion.button>
 
         {/* Map Container */}
-        <div className="flex-1 relative">
-          {/* Right Side Floating Search Panel */}
-          <div className="absolute top-4 right-4 z-[1000] w-80 pointer-events-auto">
+        <div className="absolute inset-0 w-full h-full z-0">
+          {/* Mobile-Optimized Search & Controls */}
+          <div className="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-[1000] pointer-events-auto">
             <motion.div
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.4 }}
-              className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-4"
+              className="md:bg-white/95 md:dark:bg-gray-800/95 md:backdrop-blur-xl md:rounded-2xl md:shadow-2xl md:border md:border-gray-200/50 md:dark:border-gray-700/50 md:p-4"
             >
-              {/* Search Bar */}
-              <form onSubmit={handleSearch} className="space-y-3">
-                <div className="relative">
-                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for places..."
-                    className="w-full h-11 pl-10 pr-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white placeholder-gray-400 transition-all text-sm"
-                  />
-                </div>
+              {/* Search Bar with Integrated Button */}
+              <form onSubmit={handleSearch} className="relative shadow-lg md:shadow-none rounded-xl">
+                <FaSearch className="hidden md:block absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for places..."
+                  className="w-full h-11 pl-4 md:pl-10 pr-12 bg-white md:bg-gray-50 dark:bg-gray-800 md:dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-900 dark:text-white placeholder-gray-400 transition-all text-sm"
+                />
                 <button
                   type="submit"
                   disabled={loading || !searchQuery.trim()}
-                  className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                  className="absolute right-1 top-1 bottom-1 w-9 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center p-0"
                 >
-                  <FaSearch className="h-4 w-4" />
-                  {loading ? "Searching..." : "Search"}
+                  <FaSearch className="h-3.5 w-3.5" />
                 </button>
               </form>
 
-              {/* Location Button */}
+              {/* Desktop Location Button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => currentLocation && setCenter(currentLocation)}
-                className="w-full h-11 mt-3 bg-gradient-to-br from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl hover:shadow-lg transition-all shadow-md flex items-center justify-center gap-2 font-semibold text-sm"
+                className="hidden md:flex w-full h-11 mt-3 bg-gradient-to-br from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl hover:shadow-lg transition-all shadow-md items-center justify-center gap-2 font-semibold text-sm"
                 title="My Location"
               >
                 <FaLocationArrow className="h-4 w-4" />
@@ -563,6 +561,19 @@ const Maps = () => {
               </motion.button>
             </motion.div>
           </div>
+
+          {/* Mobile Bottom-Right Location FAB */}
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => currentLocation && setCenter(currentLocation)}
+            className="absolute bottom-24 right-4 z-[1000] md:hidden w-12 h-12 bg-gradient-to-br from-indigo-600 to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center pointer-events-auto"
+            title="My Location"
+          >
+            <FaLocationArrow className="h-5 w-5" />
+          </motion.button>
 
           <MapContainer
             center={center}

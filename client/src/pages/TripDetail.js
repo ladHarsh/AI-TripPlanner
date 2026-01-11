@@ -266,18 +266,18 @@ const TripDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-6">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-4 md:py-6">
+      <div className="max-w-6xl mx-auto px-3 md:px-6 lg:px-8">
         {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-4"
+          className="hidden md:block mb-4"
         >
           <Link to="/trips">
             <Button
               variant="ghost"
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white pl-0"
             >
               <FaArrowLeft className="mr-2" />
               Back to Trips
@@ -289,51 +289,62 @@ const TripDetail = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-4 md:mb-6"
         >
-          <Card className="overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl rounded-2xl">
+          <Card className="overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl rounded-xl md:rounded-2xl p-2 md:p-0">
             {/* Hero Section */}
-            <div className="relative h-64 md:h-80 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
+            <div className="relative h-48 md:h-80 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg md:rounded-none">
               <div className="absolute inset-0 flex items-center justify-center">
-                <FaMapMarkedAlt className="h-32 w-32 text-white/20" />
+                <FaMapMarkedAlt className="h-20 w-20 md:h-32 md:w-32 text-white/20" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-lg md:rounded-none"></div>
+              
+              {/* Mobile Badge - Top Right */}
+              <div className="absolute top-2 right-2 md:hidden z-10">
+                <Badge
+                  variant={getStatusVariant()}
+                  className="inline-flex items-center rounded-full px-2.5 py-1 font-bold shadow-lg text-xs"
+                >
+                  {getStatusLabel()}
+                </Badge>
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <Badge
                       variant={getStatusVariant()}
-                      className="mb-3 font-bold shadow-lg"
+                      className="hidden md:inline-flex mb-2 md:mb-3 font-bold shadow-lg text-xs md:text-sm"
                     >
                       {getStatusLabel()}
                     </Badge>
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                    <h1 className="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2 line-clamp-1">
                       {trip.destination?.city || trip.destination}
                       {trip.destination?.country &&
                         trip.destination.city !== trip.destination.country &&
                         `, ${trip.destination.country}`}
                     </h1>
-                    <div className="flex flex-wrap gap-4 text-white/90 text-sm">
+                    <div className="flex flex-wrap gap-2 md:gap-4 text-white/90 text-[10px] md:text-sm">
                       <div className="flex items-center">
-                        <FaCalendar className="mr-2" />
+                        <FaCalendar className="mr-1 md:mr-2" />
                         {new Date(trip.startDate).toLocaleDateString("en-US", {
-                          month: "long",
+                          month: "short",
                           day: "numeric",
                           year: "numeric",
                         })}{" "}
                         -{" "}
                         {new Date(trip.endDate).toLocaleDateString("en-US", {
-                          month: "long",
+                          month: "short",
                           day: "numeric",
                           year: "numeric",
                         })}
                       </div>
                       <div className="flex items-center">
-                        <FaClock className="mr-2" />
+                        <FaClock className="mr-1 md:mr-2" />
                         {getDuration()}
                       </div>
                       <div className="flex items-center">
-                        <FaUsers className="mr-2" />
+                        <FaUsers className="mr-1 md:mr-2" />
                         {trip.preferences?.groupSize ||
                           trip.groupSize ||
                           trip.travelers ||
@@ -347,57 +358,61 @@ const TripDetail = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50">
-              <div className="flex flex-wrap gap-3">
+            <div className="p-2 md:p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50">
+              <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-3">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.95 }}
+                  className="order-1 md:order-none"
                 >
                   <Button
                     onClick={handleShare}
                     variant="outline"
-                    className="rounded-xl border-2 font-semibold"
+                    className="w-full md:w-auto rounded-lg md:rounded-xl border-2 font-semibold text-sm md:text-base py-1.5 px-2"
                   >
-                    <FaShare className="mr-2" />
+                    <FaShare className="mr-1 md:mr-2" />
                     Share
                   </Button>
                 </motion.div>
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.95 }}
+                  className="order-2 md:order-none"
                 >
                   <Button
                     onClick={handleDownload}
                     variant="outline"
-                    className="rounded-xl border-2 font-semibold"
+                    className="w-full md:w-auto rounded-lg md:rounded-xl border-2 font-semibold text-sm md:text-base py-1.5 px-2"
                   >
-                    <FaDownload className="mr-2" />
-                    Download PDF
+                    <FaDownload className="mr-1 md:mr-2" />
+                    PDF
                   </Button>
                 </motion.div>
-                <div className="ml-auto flex gap-3">
+                <div className="col-span-2 md:ml-auto flex gap-2 md:gap-3 order-3 md:order-none">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
+                    className="flex-1 md:flex-none"
                   >
                     <Button
                       onClick={() => navigate(`/trip-planner?edit=${id}`)}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl"
+                      className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg md:rounded-xl text-sm md:text-base py-1.5"
                     >
-                      <FaEdit className="mr-2" />
+                      <FaEdit className="mr-1 md:mr-2" />
                       Edit
                     </Button>
                   </motion.div>
                   <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
+                    className="flex-1 md:flex-none"
                   >
                     <Button
                       onClick={handleDelete}
                       variant="outline"
-                      className="rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 font-semibold"
+                      className="w-full md:w-auto rounded-lg md:rounded-xl border-2 border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 font-semibold text-sm md:text-base py-1.5"
                     >
-                      <FaTrash className="mr-2" />
+                      <FaTrash className="mr-1 md:mr-2" />
                       Delete
                     </Button>
                   </motion.div>
@@ -412,15 +427,15 @@ const TripDetail = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6"
+          className="mb-4 md:mb-6"
         >
-          <Card className="p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-            <div className="flex gap-2">
+          <Card className="p-1 md:p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
+            <div className="flex gap-1 md:gap-2">
               {["Overview", "Itinerary", "Details"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab.toLowerCase())}
-                  className={`flex-1 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                  className={`flex-1 px-2 md:px-4 py-2 md:py-2.5 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm transition-all duration-300 ${
                     activeTab === tab.toLowerCase()
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
                       : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -443,41 +458,99 @@ const TripDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Info */}
               <div className="lg:col-span-2 space-y-6">
-                <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <Card className="px-2 py-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
+                  <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
                     About This Trip
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
                     {trip.description ||
                       `Explore the beautiful destination of ${
                         trip.destination?.city || trip.destination
                       }. This ${getDuration()} adventure will take you through amazing experiences and unforgettable moments.`}
                   </p>
+
+                  {/* Mobile Trip Details Integration */}
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 lg:hidden">
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                            Budget
+                          </div>
+                          <div className="flex items-center text-sm font-bold text-gray-900 dark:text-white">
+                            <FaDollarSign className="mr-1 text-green-600 text-xs" />
+                            {trip.preferences?.budget?.max
+                              ? `₹${trip.preferences.budget.max}`
+                              : trip.budget?.max
+                              ? `₹${trip.budget.max}`
+                              : trip.budget || "Not specified"}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                            Travel Style
+                          </div>
+                          <div className="text-gray-900 dark:text-white font-semibold capitalize text-sm">
+                            {trip.travelStyle || "Mid-range"}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {trip.accommodation && (
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                            Accommodation
+                          </div>
+                          <div className="text-gray-900 dark:text-white font-semibold capitalize text-sm">
+                            {trip.accommodation}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {trip.interests && trip.interests.length > 0 && (
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                            Interests
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {trip.interests.map((interest, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2.5 py-1 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-semibold"
+                              >
+                                {interest}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </Card>
 
                 {trip.itinerary &&
                   (trip.itinerary.days || trip.itinerary.dailyPlans) && (
-                    <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-                      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <FaRoute className="mr-3 text-purple-600" />
+                    <Card className="px-2 py-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
+                      <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center">
+                        <FaRoute className="mr-2 md:mr-3 text-purple-600" />
                         Daily Highlights
                       </h2>
-                      <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                      <div className="space-y-3 md:max-h-96 md:overflow-y-auto md:pr-2">
                         {(trip.itinerary.days || trip.itinerary.dailyPlans).map(
                           (day, index) => (
                             <div
                               key={index}
-                              className="flex items-start p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl hover:shadow-md transition-shadow"
+                              className="flex items-start p-2 md:p-5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-md transition-shadow"
                             >
-                              <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                              <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm md:text-base mr-3">
                                 {day.day}
                               </div>
                               <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900 dark:text-white">
+                                <h4 className="font-bold text-sm md:text-base text-gray-900 dark:text-white">
                                   Day {day.day}:{" "}
                                   {day.title || day.theme || "Activities"}
                                 </h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-1">
                                   {day.activities?.[0]?.activity ||
                                     day.activities?.[0]?.title ||
                                     day.activities?.[0]?.name ||
@@ -485,7 +558,7 @@ const TripDetail = () => {
                                 </p>
                                 {day.activities &&
                                   day.activities.length > 1 && (
-                                    <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                                    <p className="text-[10px] md:text-xs text-purple-600 dark:text-purple-400 mt-1">
                                       +{day.activities.length - 1} more
                                       activities
                                     </p>
@@ -501,8 +574,8 @@ const TripDetail = () => {
 
               {/* Sidebar Info */}
               <div className="space-y-6">
-                <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                <Card className="hidden lg:block px-2 py-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-4">
                     Trip Details
                   </h3>
                   <div className="space-y-4">
@@ -558,9 +631,9 @@ const TripDetail = () => {
                 </Card>
 
                 {trip.rating && (
-                  <Card className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+                  <Card className="p-4 md:p-6 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                      <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white">
                         Your Rating
                       </h3>
                       <div className="flex items-center">
@@ -583,8 +656,8 @@ const TripDetail = () => {
           )}
 
           {activeTab === "itinerary" && (
-            <Card className="p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <Card className="px-2 py-3 md:p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
+              <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-3 md:mb-6">
                 Day-by-Day Itinerary
               </h2>
               {trip.itinerary &&
@@ -594,25 +667,25 @@ const TripDetail = () => {
                     (day, index) => (
                       <div
                         key={index}
-                        className="p-5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-gray-200/50 dark:border-gray-700/50"
+                        className="p-2 md:p-5 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-gray-200/50 dark:border-gray-700/50"
                       >
-                        <div className="flex items-start mb-3">
-                          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold mr-4">
+                        <div className="flex items-start mb-2 md:mb-3">
+                          <div className="flex-shrink-0 w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-sm md:text-base mr-3 md:mr-4">
                             {day.day}
                           </div>
                           <div className="flex-1">
-                            <div className="mb-3">
-                              <h3 className="text-xl font-bold text-gray-900 dark:text-white inline">
+                            <div className="mb-2 md:mb-3">
+                              <h3 className="text-sm md:text-xl font-bold text-gray-900 dark:text-white inline">
                                 Day {day.day}:{" "}
                               </h3>
-                              <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                              <span className="text-sm md:text-lg font-semibold text-gray-700 dark:text-gray-300">
                                 {day.title ||
                                   day.theme ||
                                   day.activities?.[0]?.activity ||
                                   "Activities planned"}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
                               <span>
                                 {new Date(day.date).toLocaleDateString(
                                   "en-US",
@@ -624,7 +697,6 @@ const TripDetail = () => {
                                   }
                                 )}
                               </span>
-                              <span>•</span>
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                                 {day.activities?.length || 0} activities
                               </span>
@@ -634,7 +706,7 @@ const TripDetail = () => {
                                 {day.activities.map((activity, actIdx) => (
                                   <div
                                     key={actIdx}
-                                    className="flex items-start text-sm text-gray-700 dark:text-gray-300 pl-4 border-l-2 border-purple-200 dark:border-purple-800"
+                                    className="flex items-start text-sm text-gray-700 dark:text-gray-300 pl-2 md:pl-4 border-l-2 border-purple-200 dark:border-purple-800"
                                   >
                                     <FaMapMarkerAlt className="mr-2 mt-1 text-purple-600 flex-shrink-0" />
                                     <span>
@@ -647,7 +719,7 @@ const TripDetail = () => {
                                       {activity.location?.name &&
                                         ` at ${activity.location.name}`}
                                       {activity.description && (
-                                        <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        <span className="hidden md:block text-xs text-gray-500 dark:text-gray-400 mt-1">
                                           {activity.description}
                                         </span>
                                       )}
@@ -663,8 +735,8 @@ const TripDetail = () => {
                   )}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <FaMapMarkedAlt className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                <div className="text-center py-6 md:py-12">
+                  <FaMapMarkedAlt className="h-12 w-12 md:h-16 md:w-16 mx-auto text-gray-300 mb-3 md:mb-4" />
                   <p className="text-gray-600 dark:text-gray-400">
                     No detailed itinerary available for this trip yet.
                   </p>
@@ -675,7 +747,7 @@ const TripDetail = () => {
 
           {activeTab === "details" && (
             <div className="space-y-6">
-              <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+              <Card className="hidden md:block p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   Trip Preferences
                 </h2>
@@ -739,19 +811,84 @@ const TripDetail = () => {
                 </div>
               </Card>
 
-              {trip.itinerary?.summary && (
-                <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    Trip Summary
-                  </h2>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {trip.itinerary.summary}
-                  </p>
+              {(trip.itinerary?.summary || trip.preferences) && (
+                <Card className="p-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
+                  {trip.itinerary?.summary && (
+                    <>
+                      <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
+                        Trip Summary
+                      </h2>
+                      <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {trip.itinerary.summary}
+                      </p>
+                    </>
+                  )}
+
+                  {/* Mobile Preferences Integration */}
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 md:hidden">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
+                      Trip Preferences
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        {trip.preferences?.travelStyle && (
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                              Travel Style
+                            </div>
+                            <div className="text-sm font-semibold text-gray-900 dark:text-white capitalize">
+                              {trip.preferences.travelStyle}
+                            </div>
+                          </div>
+                        )}
+                        {trip.preferences?.accommodation && (
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                              Accommodation
+                            </div>
+                            <div className="text-sm font-semibold text-gray-900 dark:text-white capitalize">
+                              {trip.preferences.accommodation}
+                            </div>
+                          </div>
+                        )}
+                        {trip.preferences?.transport &&
+                          trip.preferences.transport.length > 0 && (
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
+                                Transportation
+                              </div>
+                              <div className="text-sm font-semibold text-gray-900 dark:text-white capitalize">
+                                {trip.preferences.transport.join(", ")}
+                              </div>
+                            </div>
+                          )}
+                      </div>
+                        
+                      {trip.preferences?.interests &&
+                        trip.preferences.interests.length > 0 && (
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                              Interests
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {trip.preferences.interests.map((interest, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2.5 py-1 bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 rounded-full text-[10px] font-semibold text-gray-800 dark:text-gray-200 capitalize"
+                                >
+                                  {interest}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  </div>
                 </Card>
               )}
 
               {trip.itinerary?.recommendations && (
-                <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+                <Card className="px-2 py-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                     Recommendations
                   </h2>
@@ -801,7 +938,7 @@ const TripDetail = () => {
               )}
 
               {trip.specialRequests && (
-                <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+                <Card className="px-2 py-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                     Special Requests
                   </h2>
@@ -812,7 +949,7 @@ const TripDetail = () => {
               )}
 
               {trip.notes && (
-                <Card className="p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
+                <Card className="px-2 py-3 md:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-xl md:rounded-2xl">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                     Notes
                   </h2>

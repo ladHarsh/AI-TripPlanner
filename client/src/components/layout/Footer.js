@@ -11,45 +11,45 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="relative bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 dark:from-black dark:via-blue-950/50 dark:to-black text-white py-16 overflow-hidden">
+    <footer className="relative bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 dark:from-black dark:via-blue-950/50 dark:to-black text-white py-8 lg:py-16 overflow-hidden">
       {/* Background Animation */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12"
+          className="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-12 mb-8 lg:mb-12"
         >
           {/* Brand Section */}
-          <div>
-            <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <div className="col-span-2 md:col-span-1">
+            <h3 className="text-2xl lg:text-3xl font-bold mb-3 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               AI Trip Planner
             </h3>
-            <p className="text-gray-400 mb-4 leading-relaxed">
+            <p className="text-sm lg:text-base text-gray-400 mb-4 leading-relaxed">
               Your intelligent travel companion powered by cutting-edge AI. Plan
               smarter, explore better.
             </p>
-            <div className="flex space-x-4 mt-6">
+            <div className="hidden md:flex space-x-4 mt-6">
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/50"
+                className="w-11 h-11 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/50"
               >
                 <FaTwitter className="h-5 w-5" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-pink-500/50"
+                className="w-11 h-11 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-pink-500/50"
               >
                 <FaInstagram className="h-5 w-5" />
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-600/50"
+                className="w-11 h-11 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-600/50"
               >
                 <FaLinkedin className="h-5 w-5" />
               </a>
@@ -58,10 +58,10 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-white">
+            <h4 className="text-base lg:text-lg font-semibold mb-4 lg:mb-6 text-white">
               Quick Links
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-1">
               {[
                 { name: "Dashboard", to: "/dashboard" },
                 { name: "Trip Planner", to: "/trip-planner" },
@@ -77,7 +77,7 @@ const Footer = () => {
                 >
                   <Link
                     to={link.to}
-                    className="text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group"
+                    className="text-sm lg:text-base text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group py-2"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-3 group-hover:bg-purple-500"></span>
                     {link.name}
@@ -89,8 +89,10 @@ const Footer = () => {
 
           {/* Resources */}
           <div>
-            <h4 className="text-lg font-semibold mb-6 text-white">Resources</h4>
-            <div className="space-y-3">
+            <h4 className="text-base lg:text-lg font-semibold mb-4 lg:mb-6 text-white">
+              Resources
+            </h4>
+            <div className="space-y-1">
               {[
                 { name: "About Project", to: "/about" },
                 { name: "How It Works", to: "/about" },
@@ -106,7 +108,7 @@ const Footer = () => {
                 >
                   <Link
                     to={item.to}
-                    className="text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group"
+                    className="text-sm lg:text-base text-gray-400 hover:text-white hover:translate-x-2 inline-flex items-center transition-all duration-300 group py-2"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-500 mr-3 group-hover:bg-pink-500"></span>
                     {item.name}
@@ -123,14 +125,14 @@ const Footer = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="border-t border-gray-800/50 pt-8"
+          className="border-t border-gray-800/50 pt-6 lg:pt-8"
         >
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-xs lg:text-sm">
               &copy; {new Date().getFullYear()} AI Trip Planner. All rights
               reserved.
             </p>
-            <div className="flex items-center space-x-6 text-sm text-gray-400">
+            <div className="flex items-center space-x-6 text-xs lg:text-sm text-gray-400">
               <span className="flex items-center">
                 <FaShieldAlt className="h-4 w-4 mr-2 text-green-400" />
                 Secure & Private

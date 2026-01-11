@@ -228,13 +228,19 @@ router.post(
   "/change-password",
   protect,
   checkAccountStatus,
-  requireEmailVerification,
   strictAuthLimiter,
   [
     body("currentPassword")
       .notEmpty()
       .withMessage("Current password is required"),
-    ...passwordResetValidation,
+    body("newPassword")
+      .isLength({ min: 8, max: 128 })
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
+      )
+      .withMessage(
+        "New password must be 8+ characters with uppercase, lowercase, number, and special character"
+      ),
   ],
   changePassword
 );
@@ -251,6 +257,6 @@ router.post("/logout", protect, logout);
  * @desc    Logout from all devices
  * @access  Private
  */
-router.post("/logout-all", protect, requireEmailVerification, logoutAll);
+router.post("/logout-all", protect, logoutAll);
 
 module.exports = router;

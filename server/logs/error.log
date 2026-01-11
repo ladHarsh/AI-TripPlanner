@@ -280,3 +280,60 @@
 {"address":"vadodara","level":"error","message":"/maps-free/geocode error: Request failed with status code 403","service":"ai-trip-planner","stack":"AxiosError: Request failed with status code 403\n    at settle (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\node_modules\\axios\\dist\\node\\axios.cjs:2090:12)\n    at IncomingMessage.handleStreamEnd (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\node_modules\\axios\\dist\\node\\axios.cjs:3207:11)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1696:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)\n    at Axios.request (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\node_modules\\axios\\dist\\node\\axios.cjs:4317:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async FreeMapService.geocode (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\services\\freeMapService.js:59:24)\n    at async C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\routes\\mapsFree.js:17:20","timestamp":"2026-01-10 18:01:41"}
 {"address":"::","code":"EADDRINUSE","errno":-4091,"level":"error","message":"Uncaught Exception: listen EADDRINUSE: address already in use :::5000","port":5000,"service":"ai-trip-planner","stack":"Error: listen EADDRINUSE: address already in use :::5000\n    at Server.setupListenHandle [as _listen2] (node:net:1898:16)\n    at listenInCluster (node:net:1946:12)\n    at Server.listen (node:net:2044:7)\n    at startServer (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\server.js:365:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","syscall":"listen","timestamp":"2026-01-10 19:01:15"}
 {"address":"::","code":"EADDRINUSE","errno":-4091,"level":"error","message":"Uncaught Exception: listen EADDRINUSE: address already in use :::5000","port":5000,"service":"ai-trip-planner","stack":"Error: listen EADDRINUSE: address already in use :::5000\n    at Server.setupListenHandle [as _listen2] (node:net:1898:16)\n    at listenInCluster (node:net:1946:12)\n    at Server.listen (node:net:2044:7)\n    at startServer (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\server.js:365:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","syscall":"listen","timestamp":"2026-01-10 19:01:55"}
+{"address":"::","code":"EADDRINUSE","errno":-4091,"level":"error","message":"Uncaught Exception: listen EADDRINUSE: address already in use :::5000","port":5000,"service":"ai-trip-planner","stack":"Error: listen EADDRINUSE: address already in use :::5000\n    at Server.setupListenHandle [as _listen2] (node:net:1898:16)\n    at listenInCluster (node:net:1946:12)\n    at Server.listen (node:net:2044:7)\n    at startServer (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\server.js:365:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","syscall":"listen","timestamp":"2026-01-11 12:15:16"}
+{"address":"::","code":"EADDRINUSE","errno":-4091,"level":"error","message":"Uncaught Exception: listen EADDRINUSE: address already in use :::5000","port":5000,"service":"ai-trip-planner","stack":"Error: listen EADDRINUSE: address already in use :::5000\n    at Server.setupListenHandle [as _listen2] (node:net:1898:16)\n    at listenInCluster (node:net:1946:12)\n    at Server.listen (node:net:2044:7)\n    at startServer (C:\\Users\\HARSH LAD\\Desktop\\project\\AI TripPlanner\\server\\server.js:365:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","syscall":"listen","timestamp":"2026-01-11 12:19:03"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 13:49:17"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 13:49:30"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 13:59:11"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 13:59:15"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 13:59:58"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:00:42"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:00:51"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:01:24"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:01:29"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:32"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:45"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:46"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:46"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:47"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:47"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:47"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:48"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:48"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:53"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:53"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:53"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:53"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:53"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:53"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:54"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:55"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:56"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:57"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:58"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:58"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:58"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:58"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:58"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:58"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:02:59"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:00"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:01"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:02"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:03"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:03"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:03"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:03"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:03"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:06"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:08"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:08"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:03:44"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:05:04"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:05:11"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:05:20"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:05:26"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:05:44"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:05:53"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:12:00"}
+{"level":"error","message":"Free nearby search error","service":"ai-trip-planner","timestamp":"2026-01-11 14:15:07"}

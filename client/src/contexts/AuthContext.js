@@ -172,6 +172,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = (userData) => {
+    dispatch({
+      type: "UPDATE_USER",
+      payload: userData,
+    });
+  };
+
   const updateProfile = async (profileData) => {
     try {
       const response = await api.put("/auth/profile", profileData);
@@ -190,7 +197,7 @@ export const AuthProvider = ({ children }) => {
 
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      await api.put("/auth/password", { currentPassword, newPassword });
+      await api.post("/auth/change-password", { currentPassword, newPassword });
       toast.success("Password changed successfully");
       return { success: true };
     } catch (error) {
@@ -257,6 +264,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
     updateProfile,
     changePassword,
     hasPermission,

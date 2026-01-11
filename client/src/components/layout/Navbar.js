@@ -38,6 +38,7 @@ const Navbar = () => {
     { name: "Trip Planner", href: "/trip-planner", icon: FaPlane },
     { name: "My Trips", href: "/trips", icon: FaRoute },
     { name: "Maps", href: "/maps", icon: FaMapMarkedAlt },
+    { name: "Profile", href: "/profile", icon: FaUser },
   ];
 
   const currentNavigation = isAuthenticated ? userNavigation : publicNavigation;
@@ -65,8 +66,8 @@ const Navbar = () => {
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative bg-white dark:bg-gray-800 p-2 rounded-lg">
-                  <FaRoute className="h-6 w-6 text-blue-600 group-hover:text-purple-600 transition-colors" />
+                <div className="relative bg-white dark:bg-gray-800 p-1.5 md:p-2 rounded-lg">
+                  <FaRoute className="h-5 w-5 md:h-6 md:w-6 text-blue-600 group-hover:text-purple-600 transition-colors" />
                 </div>
                 <motion.div
                   className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full shadow-lg"
@@ -75,7 +76,7 @@ const Navbar = () => {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   AI Trip Planner
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
@@ -87,7 +88,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            {currentNavigation.slice(0, 6).map((item, index) => (
+            {currentNavigation.slice(0, 6).filter(item => item.name !== 'Profile').map((item, index) => (
               <motion.div
                 key={item.name}
                 initial={{ opacity: 0, y: -20 }}
@@ -144,83 +145,7 @@ const Navbar = () => {
                   </motion.div>
                 )}
 
-                {/* Notifications */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 group"
-                  >
-                    <FaBell className="h-5 w-5 group-hover:animate-pulse" />
-                    {unreadCount > 0 && (
-                      <motion.span
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg"
-                      >
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </motion.span>
-                    )}
-                  </button>
-
-                  <AnimatePresence>
-                    {showNotifications && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50"
-                      >
-                        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                          <h3 className="font-medium text-gray-900 dark:text-white">
-                            Notifications
-                          </h3>
-                          {unreadCount > 0 && (
-                            <button
-                              onClick={markAllAsRead}
-                              className="text-xs text-blue-600 hover:text-blue-700"
-                            >
-                              Mark all read
-                            </button>
-                          )}
-                        </div>
-                        <div className="max-h-64 overflow-y-auto">
-                          {notifications.length > 0 ? (
-                            notifications.slice(0, 5).map((notification) => (
-                              <div
-                                key={notification.id}
-                                className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
-                                  !notification.read
-                                    ? "bg-blue-50 dark:bg-blue-900/20"
-                                    : ""
-                                }`}
-                              >
-                                <div className="flex items-start space-x-3">
-                                  <div className="flex-1">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                      {notification.title}
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                      {notification.message}
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                      {new Date(
-                                        notification.timestamp
-                                      ).toLocaleTimeString()}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                              No notifications
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {/* User Menu */}
 
                 {/* User Menu */}
                 <div className="relative">
@@ -299,32 +224,20 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            {isAuthenticated && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="!p-2 relative"
-              >
-                <FaBell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </Button>
-            )}
 
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              {isOpen ? (
-                <FaTimes className="h-6 w-6" />
-              ) : (
-                <FaBars className="h-6 w-6" />
-              )}
-            </button>
+
+            {location.pathname !== "/" && (
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                {isOpen ? (
+                  <FaTimes className="h-6 w-6" />
+                ) : (
+                  <FaBars className="h-6 w-6" />
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

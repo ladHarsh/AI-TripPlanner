@@ -6,20 +6,35 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px; /* Base size prevents easy scaling issues */
+    -webkit-text-size-adjust: 100%; /* Prevent scaling on orientation change */
   }
   
   body {
     @apply bg-gray-50 text-gray-900;
+    overflow-x: hidden; /* Prevent horizontal scroll */
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Poppins', system-ui, sans-serif;
+    @apply break-words; /* Prevent overflow from long words */
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
   }
 }
 
 @layer components {
+  /* Enforce minimum touch target size of 44px */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200;
+    @apply inline-flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 min-h-[44px]; 
+    /* Increased py-2 to py-3 and added min-h-[44px] for touch targets */
   }
   
   .btn-primary {
@@ -47,15 +62,16 @@
   }
   
   .btn-sm {
-    @apply px-3 py-1.5 text-xs;
+    @apply px-3 py-1.5 text-xs min-h-[32px]; /* Small buttons exception, but discourage on main actions */
   }
   
   .btn-lg {
-    @apply px-6 py-3 text-base;
+    @apply px-6 py-4 text-lg min-h-[56px];
   }
   
   .input {
-    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm;
+    @apply block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base;
+    /* Changed py-2 to py-3 and sm:text-sm to text-base (16px) to prevent iOS zoom */
   }
   
   .input-error {
@@ -279,4 +295,10 @@
 
 .motion-safe\:animate-scale-in {
   @apply animate-scale-in;
+}
+
+@media (max-width: 768px) {
+  .leaflet-control-zoom {
+    display: none !important;
+  }
 }

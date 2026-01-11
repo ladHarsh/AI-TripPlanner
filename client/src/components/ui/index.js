@@ -18,10 +18,10 @@ const buttonVariants = {
 };
 
 const buttonSizes = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-base",
-  lg: "px-6 py-3 text-lg",
-  xl: "px-8 py-4 text-xl",
+  sm: "px-3 py-2 text-sm min-h-[44px]", // Increased to meet touch target req
+  md: "px-4 py-2 md:py-3 text-sm md:text-base min-h-[40px] md:min-h-[44px]",
+  lg: "px-6 py-4 text-lg min-h-[56px]",
+  xl: "px-8 py-4 text-xl min-h-[64px]",
 };
 
 export const Button = ({
@@ -112,9 +112,10 @@ export const Input = ({
   ...props
 }) => {
   const inputClasses = twMerge(
-    "block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-300",
+    "block w-full px-3 py-2 md:py-3 text-sm md:text-base border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-300 min-h-[40px] md:min-h-[44px]",
+    // Changed py-2 to py-3 and added text-base and min-h-[44px]
     error && "border-red-500 focus:ring-red-500 focus:border-red-500",
-    Icon && iconPosition === "left" && "pl-10",
+    Icon && iconPosition === "left" && "pl-8 md:pl-10",
     (Icon && iconPosition === "right") || rightElement ? "pr-10" : "",
     className
   );
@@ -130,7 +131,7 @@ export const Input = ({
       <div className="relative">
         {Icon && iconPosition === "left" && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5 text-gray-400" />
+            <Icon className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
           </div>
         )}
 
@@ -138,7 +139,7 @@ export const Input = ({
 
         {Icon && iconPosition === "right" && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <Icon className="h-5 w-5 text-gray-400" />
+            <Icon className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
           </div>
         )}
 

@@ -107,7 +107,7 @@ export const authAPI = {
   getProfile: () => api.get("/auth/me"),
   updateProfile: (profileData) => api.put("/auth/profile", profileData),
   changePassword: (passwordData) =>
-    api.put("/auth/change-password", passwordData),
+    api.post("/auth/change-password", passwordData),
   saveDestination: (destinationData) =>
     api.post("/auth/save-destination", destinationData),
   logout: () => api.post("/auth/logout"),
@@ -184,6 +184,9 @@ export const userAPI = {
     api.post("/users/avatar", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
+  updateProfile: (profileData) => api.put("/auth/profile", profileData),
+  changePassword: (passwordData) =>
+    api.post("/auth/change-password", passwordData),
 };
 
 // Error handling utility

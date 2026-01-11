@@ -92,8 +92,8 @@ const ProfileNew = () => {
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (passwordData.newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
       return;
     }
 
@@ -122,7 +122,7 @@ const ProfileNew = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-6 md:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -130,10 +130,10 @@ const ProfileNew = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
             My Profile
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
             Manage your account settings and preferences
           </p>
         </motion.div>
@@ -143,11 +143,11 @@ const ProfileNew = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex space-x-4 mb-6"
+          className="flex space-x-2 md:space-x-4 mb-6"
         >
           <button
             onClick={() => setActiveTab("details")}
-            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+            className={`flex-1 py-2 px-4 md:py-3 md:px-6 text-sm md:text-base rounded-xl font-semibold transition-all duration-300 ${
               activeTab === "details"
                 ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                 : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -158,7 +158,7 @@ const ProfileNew = () => {
           </button>
           <button
             onClick={() => setActiveTab("security")}
-            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+            className={`flex-1 py-2 px-4 md:py-3 md:px-6 text-sm md:text-base rounded-xl font-semibold transition-all duration-300 ${
               activeTab === "security"
                 ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                 : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -177,14 +177,17 @@ const ProfileNew = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <Card className="p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <Card className="relative p-3 md:p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl">
+              <div className="absolute top-4 right-4 md:hidden px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-full capitalize">
+                {user?.planType || "Free"}
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                 <FaUser className="mr-3 text-blue-600" />
                 Profile Information
               </h2>
 
-              <form onSubmit={handleProfileSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form onSubmit={handleProfileSubmit} className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <Input
                     name="firstName"
                     label="First Name"
@@ -217,8 +220,8 @@ const ProfileNew = () => {
                   required
                 />
 
-                <div className="flex items-center justify-between pt-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0 pt-4">
+                  <p className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
                     Plan Type:{" "}
                     <span className="font-semibold capitalize">
                       {user?.planType || "Free"}
@@ -229,7 +232,7 @@ const ProfileNew = () => {
                     type="submit"
                     disabled={isLoading}
                     loading={isLoading}
-                    className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                   >
                     <FaSave className="mr-2" />
                     {isLoading ? "Saving..." : "Save Changes"}
@@ -248,13 +251,13 @@ const ProfileNew = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
           >
-            <Card className="p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+            <Card className="p-3 md:p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
                 <FaLock className="mr-3 text-blue-600" />
                 Change Password
               </h2>
 
-              <form onSubmit={handlePasswordSubmit} className="space-y-6">
+              <form onSubmit={handlePasswordSubmit} className="space-y-4 md:space-y-6">
                 <Input
                   name="currentPassword"
                   type={showPasswords.current ? "text" : "password"}
@@ -320,7 +323,7 @@ const ProfileNew = () => {
                     type="submit"
                     disabled={isLoading}
                     loading={isLoading}
-                    className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                   >
                     <FaShieldAlt className="mr-2" />
                     {isLoading ? "Updating..." : "Update Password"}
@@ -332,8 +335,9 @@ const ProfileNew = () => {
                     Password Requirements:
                   </h4>
                   <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                    <li>• At least 6 characters long</li>
-                    <li>• Must match in both fields</li>
+                    <li>• At least 8 characters long</li>
+                    <li>• Must include Uppercase, Lowercase, and Number</li>
+                    <li>• Must include a Special Character (@$!%*?&)</li>
                   </ul>
                 </div>
               </form>

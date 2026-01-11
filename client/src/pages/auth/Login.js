@@ -52,9 +52,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-20 dark:opacity-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 flex items-center justify-center py-6 px-3 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Animated background - Hidden on mobile for performance and cleaner look */}
+      <div className="hidden md:block absolute inset-0 opacity-20 dark:opacity-10">
         <div className="absolute top-10 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
         <div
           className="absolute bottom-10 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"
@@ -66,61 +66,52 @@ const Login = () => {
         ></div>
       </div>
 
-      <div className="max-w-2xl w-full mx-auto relative z-10">
+      <div className="max-w-md w-full mx-auto relative z-10">
         {/* Login Form */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="w-full flex items-center justify-center p-4"
+          transition={{ duration: 0.5 }}
+          className="w-full flex items-center justify-center"
         >
           <div className="w-full">
-            <div className="text-center mb-8">
+            <div className="text-center mb-6 hidden md:block">
               <motion.div
-                className="flex justify-center mb-4"
+                className="flex justify-center mb-3"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
               >
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-75"></div>
-                  <div className="relative bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-xl">
-                    <FaRoute className="h-10 w-10 text-blue-600" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-75"></div>
+                  <div className="relative bg-white dark:bg-gray-800 p-2.5 rounded-xl shadow-lg">
+                    <FaRoute className="h-8 w-8 text-blue-600" />
                   </div>
                 </div>
               </motion.div>
-              <motion.h2
-                className="text-3xl font-bold text-gray-900 dark:text-white mb-2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                 AI Trip Planner
-              </motion.h2>
-              <motion.p
-                className="text-gray-600 dark:text-gray-400"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Welcome Back
-              </motion.p>
+              </p>
             </div>
 
-            <Card className="p-8 shadow-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl">
-              <form onSubmit={handleSubmit} className="space-y-5">
+            <Card className="p-3 md:p-8 shadow-xl border border-gray-200/50 dark:border-gray-700/50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Input
                     name="email"
                     type="email"
-                    label="Email address"
-                    placeholder="Enter your email"
+                    label="Email"
+                    placeholder="Enter email"
                     icon={FaEnvelope}
                     value={values.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={errors.email}
                     required
+                    className="py-2.5 text-sm"
                   />
                 </div>
 
@@ -129,18 +120,19 @@ const Login = () => {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     label="Password"
-                    placeholder="Enter your password"
+                    placeholder="Enter password"
                     icon={FaLock}
                     value={values.password}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={errors.password}
                     required
+                    className="py-2.5 text-sm"
                     rightElement={
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 min-h-[44px] min-w-[44px] flex items-center justify-center -mr-2"
                       >
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
                       </button>
@@ -168,7 +160,7 @@ const Login = () => {
 
                   <Link
                     to="/forgot-password"
-                    className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700"
+                    className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline p-1"
                   >
                     Forgot password?
                   </Link>
@@ -178,21 +170,21 @@ const Login = () => {
                   type="submit"
                   variant="primary"
                   size="lg"
-                  className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+                  className="w-full mt-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-md transform active:scale-95 transition-all duration-200 py-3 text-base min-h-[48px]"
                   disabled={!isValid || isLoading}
                   loading={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
                 </Button>
 
-                <div className="text-center">
+                <div className="text-center mt-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Don't have an account?{" "}
                     <Link
                       to="/register"
-                      className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700"
+                      className="font-semibold text-blue-600 dark:text-blue-400 hover:underline p-1"
                     >
-                      Sign up for free
+                      Sign up
                     </Link>
                   </p>
                 </div>
