@@ -77,7 +77,6 @@ const authRoutes = require("./routes/authNew");
 const userRoutes = require("./routes/users");
 const tripRoutes = require("./routes/trips");
 const mapRoutes = require("./routes/maps");
-const freeMapRoutes = require("./routes/mapsFree");
 const aiRoutes = require("./routes/ai");
 
 // Enhanced CORS configuration
@@ -138,7 +137,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/maps", mapRoutes);
-app.use("/api/maps-free", freeMapRoutes);
 app.use("/api/ai", aiRoutes);
 
 // Enhanced error handling middleware

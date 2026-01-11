@@ -113,7 +113,10 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post("/auth/login", { email, password });
 
       const { user, token } = response.data;
-      localStorage.setItem("token", token);
+      
+      if (token) {
+        localStorage.setItem("token", token);
+      }
 
       dispatch({
         type: "AUTH_SUCCESS",
@@ -138,7 +141,10 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post("/auth/register", userData);
 
       const { user, token } = response.data;
-      localStorage.setItem("token", token);
+      
+      if (token) {
+        localStorage.setItem("token", token);
+      }
 
       dispatch({
         type: "AUTH_SUCCESS",

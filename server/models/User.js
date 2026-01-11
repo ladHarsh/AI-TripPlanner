@@ -74,16 +74,8 @@ const userSchema = new mongoose.Schema(
     },
     isEmailVerified: {
       type: Boolean,
-      default: false,
+      default: true,
       index: true,
-    },
-    emailVerificationToken: {
-      type: String,
-      select: false,
-    },
-    emailVerificationExpires: {
-      type: Date,
-      select: false,
     },
     passwordResetToken: {
       type: String,
@@ -352,8 +344,6 @@ const userSchema = new mongoose.Schema(
       transform: function (doc, ret) {
         delete ret.password;
         delete ret.refreshTokens;
-        delete ret.emailVerificationToken;
-        delete ret.emailVerificationExpires;
         delete ret.passwordResetToken;
         delete ret.passwordResetExpires;
         delete ret.passwordChangedAt;
@@ -371,7 +361,6 @@ const userSchema = new mongoose.Schema(
 
 // Indexes for performance (email index already created by unique: true)
 userSchema.index({ role: 1, isActive: 1 });
-userSchema.index({ isEmailVerified: 1, isActive: 1 });
 userSchema.index({ lastActivity: -1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ "refreshTokens.token": 1 });
@@ -384,7 +373,6 @@ userSchema.virtual("fullProfile").get(function () {
     email: this.email,
     role: this.role,
     avatar: this.avatar,
-    isEmailVerified: this.isEmailVerified,
     planType: this.planType,
     subscriptionStatus: this.subscriptionStatus,
     preferences: this.preferences,
@@ -470,20 +458,6 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
     return JWTTimestamp < changedTimestamp;
   }
   return false;
-};
-
-// Generate email verification token
-userSchema.methods.createEmailVerificationToken = function () {
-  const verificationToken = crypto.randomBytes(32).toString("hex");
-
-  this.emailVerificationToken = crypto
-    .createHash("sha256")
-    .update(verificationToken)
-    .digest("hex");
-
-  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-  return verificationToken;
 };
 
 // Generate password reset token
@@ -654,16 +628,6 @@ userSchema.methods.canPerformAction = function (action) {
 
 // Static Methods
 
-// Find user by email verification token
-userSchema.statics.findByEmailVerificationToken = function (token) {
-  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-
-  return this.findOne({
-    emailVerificationToken: hashedToken,
-    emailVerificationExpires: { $gt: Date.now() },
-  });
-};
-
 // Find user by password reset token
 userSchema.statics.findByPasswordResetToken = function (token) {
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -671,15 +635,6 @@ userSchema.statics.findByPasswordResetToken = function (token) {
   return this.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
-  });
-};
-
-// Clean up unverified users older than 24 hours
-userSchema.statics.cleanupUnverifiedUsers = function () {
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  return this.deleteMany({
-    isEmailVerified: false,
-    createdAt: { $lt: cutoff },
   });
 };
 

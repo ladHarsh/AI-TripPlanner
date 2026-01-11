@@ -7,10 +7,6 @@ const {
   refresh,
   logout,
   logoutAll,
-  verifyEmail,
-  resendVerification,
-  forgotPassword,
-  resetPassword,
   changePassword,
   getMe,
   updateProfile,
@@ -18,7 +14,6 @@ const {
 const {
   protect,
   authorize,
-  requireEmailVerification,
   checkAccountStatus,
   userRateLimit,
 } = require("../middleware/auth");
@@ -145,42 +140,6 @@ router.post("/login", authLimiter, loginValidation, login);
  */
 router.post("/refresh", refresh);
 
-/**
- * @route   GET /api/auth/verify-email/:token
- * @desc    Verify user email address
- * @access  Public
- */
-router.get("/verify-email/:token", verifyEmail);
-
-/**
- * @route   POST /api/auth/forgot-password
- * @desc    Send password reset email
- * @access  Public
- */
-router.post(
-  "/forgot-password",
-  strictAuthLimiter,
-  [
-    body("email")
-      .isEmail()
-      .normalizeEmail()
-      .withMessage("Please provide a valid email"),
-  ],
-  forgotPassword
-);
-
-/**
- * @route   POST /api/auth/reset-password/:token
- * @desc    Reset password using token
- * @access  Public
- */
-router.post(
-  "/reset-password/:token",
-  strictAuthLimiter,
-  passwordResetValidation,
-  resetPassword
-);
-
 // =======================
 // PROTECTED ROUTES (Authentication required)
 // =======================
@@ -204,19 +163,6 @@ router.put(
   userRateLimit(20, 15 * 60 * 1000), // 20 requests per 15 minutes
   profileUpdateValidation,
   updateProfile
-);
-
-/**
- * @route   POST /api/auth/resend-verification
- * @desc    Resend email verification
- * @access  Private
- */
-router.post(
-  "/resend-verification",
-  protect,
-  checkAccountStatus,
-  strictAuthLimiter,
-  resendVerification
 );
 
 /**

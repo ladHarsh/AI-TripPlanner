@@ -142,33 +142,16 @@ export const tripAPI = {
   getRecentTrips: () => api.get("/trips/recent"),
 };
 
-// Maps API calls
+// Maps API calls (using consolidated backend route)
 export const mapsAPI = {
   getNearbyPlaces: (params = {}) => api.get("/maps/places/nearby", { params }),
   searchPlaces: (params = {}) => api.get("/maps/places/search", { params }),
-  getPlaceDetails: (params = {}) => api.get("/maps/places/details", { params }),
   getDirections: (params = {}) => api.get("/maps/directions", { params }),
-  getDistanceMatrix: (params = {}) =>
-    api.get("/maps/distance-matrix", { params }),
   geocodeAddress: (params = {}) => api.get("/maps/geocode", { params }),
   reverseGeocode: (params = {}) => api.get("/maps/reverse-geocode", { params }),
   saveLocation: (locationData) => api.post("/maps/save-location", locationData),
   getSavedLocations: () => api.get("/maps/saved-locations"),
   deleteSavedLocation: (id) => api.delete(`/maps/saved-locations/${id}`),
-  optimizeRoute: (params = {}) =>
-    api.get("/maps/route-optimization", { params }),
-};
-
-// Free Maps API (OSM/Overpass/Nominatim/OSRM)
-export const mapsFreeAPI = {
-  getNearbyPlaces: (params = {}) =>
-    api.get("/maps-free/places/nearby", { params }),
-  searchPlaces: (params = {}) =>
-    api.get("/maps-free/places/search", { params }),
-  getDirections: (params = {}) => api.get("/maps-free/directions", { params }),
-  geocodeAddress: (params = {}) => api.get("/maps-free/geocode", { params }),
-  reverseGeocode: (params = {}) =>
-    api.get("/maps-free/reverse-geocode", { params }),
 };
 
 // User API calls

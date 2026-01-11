@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import { ThemeProvider } from "./contexts/ThemeContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
@@ -16,135 +15,133 @@ import TripPlanner from "./pages/TripPlanner";
 import Trips from "./pages/Trips";
 import TripDetail from "./pages/TripDetail";
 import Maps from "./pages/Maps";
-import ProfileNew from "./pages/ProfileNew";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-            </Route>
+    <AuthProvider>
+      <NotificationProvider>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+          </Route>
 
-            {/* Auth Routes - only accessible when not logged in */}
-            <Route path="/auth" element={<Layout fullScreen />}>
-              <Route
-                path="login"
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="register"
-                element={
-                  <PublicRoute>
-                    <Register />
-                  </PublicRoute>
-                }
-              />
-            </Route>
-
-            {/* Legacy auth routes for compatibility */}
+          {/* Auth Routes - only accessible when not logged in */}
+          <Route path="/auth" element={<Layout fullScreen />}>
             <Route
-              path="/login"
+              path="login"
               element={
                 <PublicRoute>
-                  <Layout fullScreen>
-                    <Login />
-                  </Layout>
+                  <Login />
                 </PublicRoute>
               }
             />
             <Route
-              path="/register"
+              path="register"
               element={
                 <PublicRoute>
-                  <Layout fullScreen>
-                    <Register />
-                  </Layout>
+                  <Register />
                 </PublicRoute>
               }
             />
+          </Route>
 
-            {/* Protected Routes - only accessible when logged in */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Layout showSidebar>
-                    <Dashboard />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          {/* Legacy auth routes for compatibility */}
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Layout fullScreen>
+                  <Login />
+                </Layout>
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <Layout fullScreen>
+                  <Register />
+                </Layout>
+              </PublicRoute>
+            }
+          />
 
-            <Route
-              path="/trip-planner"
-              element={
-                <ProtectedRoute>
-                  <Layout showSidebar>
-                    <TripPlanner />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          {/* Protected Routes - only accessible when logged in */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Layout showSidebar>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/trips"
-              element={
-                <ProtectedRoute>
-                  <Layout showSidebar>
-                    <Trips />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/trip-planner"
+            element={
+              <ProtectedRoute>
+                <Layout showSidebar>
+                  <TripPlanner />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/trips/:id"
-              element={
-                <ProtectedRoute>
-                  <Layout showSidebar>
-                    <TripDetail />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/trips"
+            element={
+              <ProtectedRoute>
+                <Layout showSidebar>
+                  <Trips />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/maps"
-              element={
-                <ProtectedRoute>
-                  <Layout showNavbarOnly>
-                    <Maps />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/trips/:id"
+            element={
+              <ProtectedRoute>
+                <Layout showSidebar>
+                  <TripDetail />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Layout showSidebar>
-                    <ProfileNew />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/maps"
+            element={
+              <ProtectedRoute>
+                <Layout showNavbarOnly>
+                  <Maps />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-            {/* 404 Not Found */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </NotificationProvider>
-      </AuthProvider>
-    </ThemeProvider>
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Layout showSidebar>
+                  <Profile />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 404 Not Found */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </NotificationProvider>
+    </AuthProvider>
   );
 }
 

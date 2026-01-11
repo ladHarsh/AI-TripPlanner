@@ -290,25 +290,7 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-/**
- * Require email verification
- */
 const requireEmailVerification = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
-      success: false,
-      message: "Authentication required",
-    });
-  }
-
-  if (!req.user.isEmailVerified) {
-    return res.status(403).json({
-      success: false,
-      message: "Email verification required",
-      action: "verify_email",
-    });
-  }
-
   next();
 };
 
@@ -388,7 +370,6 @@ module.exports = {
   authorize,
   checkPermission,
   optionalAuth,
-  requireEmailVerification,
   checkAccountStatus,
   userRateLimit,
 };

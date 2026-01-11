@@ -63,26 +63,8 @@ const register = async (req, res) => {
       createdFrom: "web",
     });
 
-    // Generate email verification token
-    const verificationToken = user.createEmailVerificationToken();
     user.addLoginHistory(req.ip, req.get("User-Agent"), "Unknown", true);
-
     await user.save();
-
-    // Send verification email
-    try {
-      await emailService.sendEmailVerification(
-        user.email,
-        verificationToken,
-        user.name
-      );
-      logger.info("Verification email sent:", {
-        userId: user._id,
-        email: user.email,
-      });
-    } catch (emailError) {
-      logger.error("Failed to send verification email:", emailError);
-    }
 
     // Generate tokens
     const tokens = tokenManager.generateTokenPair(user);
@@ -107,7 +89,7 @@ const register = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Registration successful. Please verify your email address.",
+      message: "Registration successful",
       user: user.fullProfile,
       accessToken: tokens.accessToken,
       expiresIn: tokens.accessTokenExpiresIn,
@@ -398,214 +380,6 @@ const logoutAll = async (req, res) => {
 };
 
 /**
- * Verify email address
- * GET /api/auth/verify-email/:token
- */
-const verifyEmail = async (req, res) => {
-  try {
-    const { token } = req.params;
-
-    const user = await User.findByEmailVerificationToken(token);
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired verification token",
-      });
-    }
-
-    user.isEmailVerified = true;
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpires = undefined;
-
-    await user.save();
-
-    // Send welcome email
-    try {
-      await emailService.sendWelcomeEmail(user.email, user.name);
-    } catch (emailError) {
-      logger.error("Failed to send welcome email:", emailError);
-    }
-
-    logger.info("Email verified successfully:", {
-      userId: user._id,
-      email: user.email,
-    });
-
-    res.json({
-      success: true,
-      message: "Email verified successfully",
-    });
-  } catch (error) {
-    logger.error("Email verification error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Email verification failed",
-    });
-  }
-};
-
-/**
- * Resend email verification
- * POST /api/auth/resend-verification
- */
-const resendVerification = async (req, res) => {
-  try {
-    const user = req.user;
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is already verified",
-      });
-    }
-
-    const verificationToken = user.createEmailVerificationToken();
-    await user.save();
-
-    await emailService.sendEmailVerification(
-      user.email,
-      verificationToken,
-      user.name
-    );
-
-    logger.info("Verification email resent:", {
-      userId: user._id,
-      email: user.email,
-    });
-
-    res.json({
-      success: true,
-      message: "Verification email sent successfully",
-    });
-  } catch (error) {
-    logger.error("Resend verification error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to send verification email",
-    });
-  }
-};
-
-/**
- * Forgot password - send reset link
- * POST /api/auth/forgot-password
- */
-const forgotPassword = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
-    }
-
-    const { email } = req.body;
-
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-      isActive: true,
-    });
-
-    // Don't reveal if user exists for security
-    if (!user) {
-      logger.warn("Password reset requested for non-existent user:", {
-        email,
-        ip: req.ip,
-      });
-    } else {
-      const resetToken = user.createPasswordResetToken();
-      await user.save();
-
-      try {
-        await emailService.sendPasswordReset(user.email, resetToken, user.name);
-        logger.info("Password reset email sent:", {
-          userId: user._id,
-          email: user.email,
-        });
-      } catch (emailError) {
-        logger.error("Failed to send password reset email:", emailError);
-        user.passwordResetToken = undefined;
-        user.passwordResetExpires = undefined;
-        await user.save();
-
-        return res.status(500).json({
-          success: false,
-          message: "Failed to send reset email",
-        });
-      }
-    }
-
-    res.json({
-      success: true,
-      message:
-        "If an account with this email exists, a password reset link has been sent",
-    });
-  } catch (error) {
-    logger.error("Forgot password error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Password reset request failed",
-    });
-  }
-};
-
-/**
- * Reset password using token
- * POST /api/auth/reset-password/:token
- */
-const resetPassword = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
-    }
-
-    const { token } = req.params;
-    const { password } = req.body;
-
-    const user = await User.findByPasswordResetToken(token);
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid or expired reset token",
-      });
-    }
-
-    // Update password
-    user.password = password;
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-
-    // Invalidate all refresh tokens for security
-    user.refreshTokens = [];
-
-    await user.save();
-
-    logger.info("Password reset successfully:", {
-      userId: user._id,
-      ip: req.ip,
-    });
-
-    res.json({
-      success: true,
-      message: "Password reset successfully",
-    });
-  } catch (error) {
-    logger.error("Reset password error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Password reset failed",
-    });
-  }
-};
-
-/**
  * Change password (authenticated user)
  * POST /api/auth/change-password
  */
@@ -794,10 +568,6 @@ module.exports = {
   refresh,
   logout,
   logoutAll,
-  verifyEmail,
-  resendVerification,
-  forgotPassword,
-  resetPassword,
   changePassword,
   getMe,
   updateProfile,

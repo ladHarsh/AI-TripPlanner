@@ -2,11 +2,9 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext";
-import { useTheme } from "../../contexts/ThemeContext";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
-
 const Layout = ({
   children,
   showSidebar = false,
@@ -14,16 +12,6 @@ const Layout = ({
   showNavbarOnly = false,
 }) => {
   const { isAuthenticated } = useAuth();
-  const { theme } = useTheme();
-
-  // Apply dark mode class
-  React.useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
 
   const shouldShowSidebar = showSidebar && isAuthenticated;
 

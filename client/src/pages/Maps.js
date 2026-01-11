@@ -6,7 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { toast } from "react-hot-toast";
-import { mapsFreeAPI, mapsAPI } from "../services/api";
+import { mapsAPI } from "../services/api";
 import {
   FaMapMarkedAlt,
   FaLocationArrow,
@@ -99,7 +99,7 @@ const Maps = () => {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await mapsFreeAPI.getNearbyPlaces({
+      const { data } = await mapsAPI.getNearbyPlaces({
         lat: currentLocation.lat,
         lng: currentLocation.lng,
         type: placeType,
@@ -149,7 +149,7 @@ const Maps = () => {
     if (!searchQuery.trim()) return;
     try {
       setLoading(true);
-      const res = await mapsFreeAPI.geocodeAddress({ address: searchQuery });
+      const res = await mapsAPI.geocodeAddress({ address: searchQuery });
       const loc = res.data?.result?.location;
       if (loc) {
         setCenter(loc);
@@ -198,7 +198,7 @@ const Maps = () => {
       // Get human-readable address via free reverse geocode to avoid Google
       let address = `${lat}, ${lng}`;
       try {
-        const rev = await mapsFreeAPI.reverseGeocode({ lat, lng });
+        const rev = await mapsAPI.reverseGeocode({ lat, lng });
         address = rev.data?.result?.formatted_address || address;
       } catch {}
       const response = await mapsAPI.saveLocation({ name, lat, lng, address });

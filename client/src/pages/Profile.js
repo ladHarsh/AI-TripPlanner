@@ -2,547 +2,348 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
-import { Card, Button, LoadingSpinner } from "../components/ui";
+import { userAPI } from "../services/api";
+import { Card, Button, Input, LoadingSpinner } from "../components/ui";
 import {
   FaUser,
   FaEnvelope,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaCalendar,
-  FaCamera,
-  FaEdit,
-  FaSave,
-  FaTimes,
-  FaKey,
-  FaBell,
-  FaGlobe,
+  FaLock,
   FaShieldAlt,
-  FaHeart,
-  FaStar,
-  FaRoute,
+  FaSave,
+  FaEye,
+  FaEyeSlash,
 } from "react-icons/fa";
 
 const Profile = () => {
-  const { user, updateProfile } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile"); // profile, settings, security
-  const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    location: user?.location || "",
-    bio: user?.bio || "",
+  const { user, updateUser } = useAuth();
+  const [activeTab, setActiveTab] = useState("details");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
   });
 
+  // Profile Details State
+  const [profileData, setProfileData] = useState({
+    firstName: user?.name?.split(" ")[0] || "",
+    lastName: user?.name?.split(" ")[1] || "",
+    email: user?.email || "",
+  });
+
+  // Password State
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleProfileChange = (e) => {
+    setProfileData({
+      ...profileData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handlePasswordChange = (e) => {
-    setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = async () => {
-    try {
-      setLoading(true);
-      await updateProfile(formData);
-      toast.success("Profile updated successfully!");
-      setIsEditing(false);
-    } catch (error) {
-      toast.error("Failed to update profile");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePasswordUpdate = async () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    if (passwordData.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
-    try {
-      setLoading(true);
-      // API call to update password
-      toast.success("Password updated successfully!");
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    } catch (error) {
-      toast.error("Failed to update password");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setFormData({
-      name: user?.name || "",
-      email: user?.email || "",
-      phone: user?.phone || "",
-      location: user?.location || "",
-      bio: user?.bio || "",
+    setPasswordData({
+      ...passwordData,
+      [e.target.name]: e.target.value,
     });
-    setIsEditing(false);
   };
 
-  // Mock stats
-  const stats = [
-    {
-      label: "Trips Planned",
-      value: user?.tripsCount || 12,
-      icon: FaRoute,
-      color: "from-blue-600 to-purple-600",
-    },
-    {
-      label: "Destinations",
-      value: user?.destinationsCount || 8,
-      icon: FaGlobe,
-      color: "from-purple-600 to-pink-600",
-    },
-    {
-      label: "Favorites",
-      value: user?.favoritesCount || 24,
-      icon: FaHeart,
-      color: "from-pink-600 to-red-600",
-    },
-    {
-      label: "Reviews",
-      value: user?.reviewsCount || 15,
-      icon: FaStar,
-      color: "from-yellow-500 to-orange-600",
-    },
-  ];
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords({
+      ...showPasswords,
+      [field]: !showPasswords[field],
+    });
+  };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const fullName =
+        `${profileData.firstName} ${profileData.lastName}`.trim();
+
+      const response = await userAPI.updateProfile({
+        name: fullName,
+        email: profileData.email,
+      });
+
+      if (response.data.success) {
+        updateUser({ ...user, name: fullName, email: profileData.email });
+        toast.success("Profile updated successfully!");
+      }
+    } catch (error) {
+      console.error("Profile update error:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("New passwords don't match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await userAPI.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      if (response.data.success) {
+        toast.success("Password changed successfully!");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (error) {
+      console.error("Password change error:", error);
+      toast.error(error.response?.data?.message || "Failed to change password");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-6">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-950/50 dark:to-gray-900 py-6 md:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="text-center mb-8"
         >
-          <Card className="overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-xl rounded-2xl">
-            {/* Hero Section with Gradient */}
-            <div className="relative h-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-              <div className="absolute -bottom-12 left-6">
-                <div className="relative">
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white shadow-xl">
-                    <FaUser className="h-12 w-12" />
-                  </div>
-                  <button className="absolute bottom-0 right-0 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg hover:shadow-xl transition-all">
-                    <FaCamera className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Profile Info */}
-            <div className="pt-16 px-6 pb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {user?.name || "Your Name"}
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400 flex items-center">
-                    <FaEnvelope className="mr-2" />
-                    {user?.email || "youremail@example.com"}
-                  </p>
-                  {user?.location && (
-                    <p className="text-gray-600 dark:text-gray-400 flex items-center mt-1">
-                      <FaMapMarkerAlt className="mr-2" />
-                      {user.location}
-                    </p>
-                  )}
-                  <p className="text-sm text-gray-500 dark:text-gray-500 flex items-center mt-1">
-                    <FaCalendar className="mr-2" />
-                    Member since{" "}
-                    {user?.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                          month: "long",
-                          year: "numeric",
-                        })
-                      : "January 2024"}
-                  </p>
-                </div>
-                {!isEditing && (
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      onClick={() => setIsEditing(true)}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg"
-                    >
-                      <FaEdit className="mr-2" />
-                      Edit Profile
-                    </Button>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6"
-        >
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                whileHover={{ scale: 1.02 }}
-                className="cursor-pointer"
-              >
-                <Card className="p-5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl hover:shadow-xl transition-all">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                        {stat.label}
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {stat.value}
-                      </p>
-                    </div>
-                    <div
-                      className={`bg-gradient-to-br ${stat.color} p-3 rounded-xl`}
-                    >
-                      <stat.icon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            My Profile
+          </h1>
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+            Manage your account settings and preferences
+          </p>
         </motion.div>
 
         {/* Tabs */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-6"
+          transition={{ delay: 0.1 }}
+          className="flex space-x-2 md:space-x-4 mb-6"
         >
-          <Card className="p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-            <div className="flex gap-2">
-              {[
-                { id: "profile", label: "Profile", icon: FaUser },
-                { id: "settings", label: "Settings", icon: FaBell },
-                { id: "security", label: "Security", icon: FaShieldAlt },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                    activeTab === tab.id
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
-                >
-                  <tab.icon className="h-4 w-4" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </Card>
+          <button
+            onClick={() => setActiveTab("details")}
+            className={`flex-1 py-2 px-4 md:py-3 md:px-6 text-sm md:text-base rounded-xl font-semibold transition-all duration-300 ${
+              activeTab === "details"
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            }`}
+          >
+            <FaUser className="inline-block mr-2" />
+            Profile Details
+          </button>
+          <button
+            onClick={() => setActiveTab("security")}
+            className={`flex-1 py-2 px-4 md:py-3 md:px-6 text-sm md:text-base rounded-xl font-semibold transition-all duration-300 ${
+              activeTab === "security"
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            }`}
+          >
+            <FaShieldAlt className="inline-block mr-2" />
+            Security
+          </button>
         </motion.div>
 
-        {/* Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          {activeTab === "profile" && (
-            <Card className="p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Personal Information
+        {/* Profile Details Tab */}
+        {activeTab === "details" && (
+          <motion.div
+            key="details"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <Card className="relative p-3 md:p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl">
+              <div className="absolute top-4 right-4 md:hidden px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-full capitalize">
+                {user?.planType || "Free"}
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <FaUser className="mr-3 text-blue-600" />
+                Profile Information
               </h2>
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className={`w-full pl-10 pr-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        isEditing
-                          ? "focus:ring-2 focus:ring-blue-500"
-                          : "cursor-not-allowed opacity-75"
-                      }`}
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className={`w-full pl-10 pr-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        isEditing
-                          ? "focus:ring-2 focus:ring-blue-500"
-                          : "cursor-not-allowed opacity-75"
-                      }`}
-                    />
-                  </div>
-                </div>
+              <form onSubmit={handleProfileSubmit} className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  <Input
+                    name="firstName"
+                    label="First Name"
+                    placeholder="Enter your first name"
+                    icon={FaUser}
+                    value={profileData.firstName}
+                    onChange={handleProfileChange}
+                    required
+                  />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Phone Number
-                  </label>
-                  <div className="relative">
-                    <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      placeholder="+91 1234567890"
-                      className={`w-full pl-10 pr-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        isEditing
-                          ? "focus:ring-2 focus:ring-blue-500"
-                          : "cursor-not-allowed opacity-75"
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Location
-                  </label>
-                  <div className="relative">
-                    <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      placeholder="City, Country"
-                      className={`w-full pl-10 pr-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white ${
-                        isEditing
-                          ? "focus:ring-2 focus:ring-blue-500"
-                          : "cursor-not-allowed opacity-75"
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    placeholder="Tell us about yourself..."
-                    rows="4"
-                    className={`w-full px-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white ${
-                      isEditing
-                        ? "focus:ring-2 focus:ring-blue-500"
-                        : "cursor-not-allowed opacity-75"
-                    }`}
+                  <Input
+                    name="lastName"
+                    label="Last Name"
+                    placeholder="Enter your last name"
+                    icon={FaUser}
+                    value={profileData.lastName}
+                    onChange={handleProfileChange}
+                    required
                   />
                 </div>
 
-                {isEditing && (
-                  <div className="flex gap-3 pt-4">
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1"
-                    >
-                      <Button
-                        onClick={handleSave}
-                        disabled={loading}
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg"
-                      >
-                        {loading ? (
-                          <LoadingSpinner size="sm" />
-                        ) : (
-                          <>
-                            <FaSave className="mr-2" />
-                            Save Changes
-                          </>
-                        )}
-                      </Button>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button
-                        onClick={handleCancel}
-                        variant="outline"
-                        className="px-6 py-3 rounded-xl border-2 font-semibold"
-                      >
-                        <FaTimes className="mr-2" />
-                        Cancel
-                      </Button>
-                    </motion.div>
-                  </div>
-                )}
-              </div>
-            </Card>
-          )}
+                <Input
+                  name="email"
+                  type="email"
+                  label="Email Address"
+                  placeholder="Enter your email"
+                  icon={FaEnvelope}
+                  value={profileData.email}
+                  onChange={handleProfileChange}
+                  required
+                />
 
-          {activeTab === "settings" && (
-            <Card className="p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Notification Settings
-              </h2>
-              <div className="space-y-5">
-                {[
-                  {
-                    label: "Email Notifications",
-                    description: "Receive email updates about your trips",
-                  },
-                  {
-                    label: "Push Notifications",
-                    description: "Get push notifications on your device",
-                  },
-                  {
-                    label: "Trip Reminders",
-                    description: "Reminders before your trips",
-                  },
-                  {
-                    label: "Marketing Emails",
-                    description: "Receive promotional offers and updates",
-                  },
-                ].map((setting, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-xl"
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0 pt-4">
+                  <p className="hidden md:block text-sm text-gray-600 dark:text-gray-400">
+                    Plan Type:{" "}
+                    <span className="font-semibold capitalize">
+                      {user?.planType || "Free"}
+                    </span>
+                  </p>
+
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    loading={isLoading}
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                   >
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {setting.label}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {setting.description}
-                      </p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        defaultChecked={index < 2}
-                      />
-                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-purple-600"></div>
-                    </label>
-                  </div>
-                ))}
-              </div>
+                    <FaSave className="mr-2" />
+                    {isLoading ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </form>
             </Card>
-          )}
+          </motion.div>
+        )}
 
-          {activeTab === "security" && (
-            <Card className="p-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg rounded-2xl">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        {/* Security Tab */}
+        {activeTab === "security" && (
+          <motion.div
+            key="security"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+          >
+            <Card className="p-3 md:p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <FaLock className="mr-3 text-blue-600" />
                 Change Password
               </h2>
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Current Password
-                  </label>
-                  <div className="relative">
-                    <FaKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      name="currentPassword"
-                      value={passwordData.currentPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full pl-10 pr-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <FaKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full pl-10 pr-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
+              <form onSubmit={handlePasswordSubmit} className="space-y-4 md:space-y-6">
+                <Input
+                  name="currentPassword"
+                  type={showPasswords.current ? "text" : "password"}
+                  label="Current Password"
+                  placeholder="Enter your current password"
+                  icon={FaLock}
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  required
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility("current")}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPasswords.current ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  }
+                />
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <FaKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      className="w-full pl-10 pr-4 py-3 border-0 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
+                <Input
+                  name="newPassword"
+                  type={showPasswords.new ? "text" : "password"}
+                  label="New Password"
+                  placeholder="Enter your new password"
+                  icon={FaLock}
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  required
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility("new")}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPasswords.new ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  }
+                />
 
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="pt-4"
-                >
+                <Input
+                  name="confirmPassword"
+                  type={showPasswords.confirm ? "text" : "password"}
+                  label="Confirm New Password"
+                  placeholder="Confirm your new password"
+                  icon={FaLock}
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                  required
+                  rightElement={
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility("confirm")}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPasswords.confirm ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  }
+                />
+
+                <div className="flex justify-end pt-4">
                   <Button
-                    onClick={handlePasswordUpdate}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg"
+                    type="submit"
+                    disabled={isLoading}
+                    loading={isLoading}
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
                   >
-                    {loading ? <LoadingSpinner size="sm" /> : "Update Password"}
+                    <FaShieldAlt className="mr-2" />
+                    {isLoading ? "Updating..." : "Update Password"}
                   </Button>
-                </motion.div>
-              </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                    Password Requirements:
+                  </h4>
+                  <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>• At least 8 characters long</li>
+                    <li>• Must include Uppercase, Lowercase, and Number</li>
+                    <li>• Must include a Special Character (@$!%*?&)</li>
+                  </ul>
+                </div>
+              </form>
             </Card>
-          )}
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
